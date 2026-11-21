@@ -17,10 +17,13 @@ const plataBo = new Intl.NumberFormat("es-BO", {
   maximumFractionDigits: 2,
 });
 
-/** "Bs 200", "Bs 12,50" (centavos solo si los hay) */
+/** Espacio no separable: "Bs" y el monto nunca quedan en líneas distintas. */
+export const ESPACIO_FIJO = "\u00a0";
+
+/** "Bs 200", "Bs 12,50" (centavos solo si los hay), con espacio no separable. */
 export function formatearBs(n: number): string {
   const redondeado = Math.round(n * 100) / 100;
-  return `Bs ${Number.isInteger(redondeado) ? formatearNumero(redondeado) : plataBo.format(redondeado)}`;
+  return `Bs${ESPACIO_FIJO}${Number.isInteger(redondeado) ? formatearNumero(redondeado) : plataBo.format(redondeado)}`;
 }
 
 /** Plural en español de una palabra o de la primera palabra de una expresión. */

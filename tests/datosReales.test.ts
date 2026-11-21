@@ -55,7 +55,7 @@ describe("unidades_locales", () => {
 describe("precios_referencia", () => {
   const precios = preciosDelJson();
 
-  it("pollo: Bs 20,50 el kilo, El Deber / eju.tv", () => {
+  it("pollo: Bs\u00a020,50 el kilo, El Deber / eju.tv", () => {
     expect(precios.find((p) => p.producto === "pollo")).toEqual({
       producto: "pollo",
       unidad: "kilo",
@@ -72,7 +72,7 @@ describe("precios_referencia", () => {
     expect(precios.find((p) => p.producto === "pollo entero")).toMatchObject({ unidad: "unidad", precio: 41 });
   });
 
-  it("'3 libras a Bs 8' queda en Bs 2,67 la libra", () => {
+  it("'3 libras a Bs\u00a08' queda en Bs\u00a02,67 la libra", () => {
     expect(precios.find((p) => p.producto === "pepino")).toMatchObject({ unidad: "libra", precio: 2.67, precioAntes: 1.67 });
   });
 
@@ -82,7 +82,7 @@ describe("precios_referencia", () => {
 
   it("texto en pantalla con su fuente", () => {
     const pollo = precios.find((p) => p.producto === "pollo")!;
-    expect(textoReferencia(pollo)).toBe("En el mercado ya está a Bs 20,50 el kilo");
+    expect(textoReferencia(pollo)).toBe("En el mercado ya está a Bs\u00a020,50 el kilo");
     expect(fuenteReferencia(pollo)).toBe("Fuente: El Deber / eju.tv · Abasto Minorista · 28 de julio de 2026");
   });
 });
@@ -140,6 +140,6 @@ describe("frases del escenario del JSON", () => {
       { id: "2", fecha: new Date(2026, 10, 16, 9).toISOString(), tipo: "venta", producto: "pollo", cantidad: 3, unidad: "kilo", total: 39, pago: "efectivo" },
     ];
     const alerta = revisarMargen("pollo", { movimientos: movs, ahora: new Date(2026, 10, 16, 12) })!;
-    expect(textoReferencia(alerta.referencia!)).toBe("En el mercado ya está a Bs 20,50 el kilo");
+    expect(textoReferencia(alerta.referencia!)).toBe("En el mercado ya está a Bs\u00a020,50 el kilo");
   });
 });

@@ -32,7 +32,7 @@ export default function AccionesDemo() {
   const borrar = () => {
     borrarTodo();
     setPendiente(null);
-    setAviso("Se borraron todos los movimientos.");
+    setAviso("Se borró todo.");
   };
 
   const botonDiscreto =
@@ -71,7 +71,7 @@ export default function AccionesDemo() {
           <p className="text-lg font-bold">
             {pendiente === "demo"
               ? `Esto reemplaza lo que tienes (${registros}) por los datos del demo. ¿Seguimos?`
-              : `¿Borrar ${cantidad === 1 ? "" : "los "}${registros}? No se puede deshacer.`}
+              : `¿Borrar ${registros}? No se puede deshacer.`}
           </p>
           <div className="mt-3 flex justify-center gap-3">
             <button

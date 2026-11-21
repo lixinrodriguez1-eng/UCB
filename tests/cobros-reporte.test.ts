@@ -15,24 +15,24 @@ const mov = (
 });
 
 describe("mensajeCobro", () => {
-  it("el ejemplo: doña Rosa, Bs 41 del pollo", () => {
+  it("el ejemplo: doña Rosa, Bs\u00a041 del pollo", () => {
     expect(mensajeCobro({ cliente: "doña Rosa", total: 41, productos: ["pollo"] })).toBe(
-      "Hola doña Rosa, le recuerdo los Bs 41 del pollo 🙂",
+      "Hola doña Rosa, le recuerdo los Bs\u00a041 del pollo 🙂",
     );
   });
 
   it("varios productos con su artículo", () => {
     expect(mensajeCobro({ cliente: "don Pedro", total: 27.5, productos: ["pollo", "papa", "queso"] })).toBe(
-      "Hola don Pedro, le recuerdo los Bs 27,50 del pollo, de la papa y del queso 🙂",
+      "Hola don Pedro, le recuerdo los Bs\u00a027,50 del pollo, de la papa y del queso 🙂",
     );
     expect(mensajeCobro({ cliente: "Juan", total: 30, productos: ["carne de res"] })).toBe(
-      "Hola Juan, le recuerdo los Bs 30 de la carne de res 🙂",
+      "Hola Juan, le recuerdo los Bs\u00a030 de la carne de res 🙂",
     );
   });
 
   it("sin nombre saluda igual", () => {
     expect(mensajeCobro({ cliente: "Sin nombre", total: 10, productos: ["tomate"] })).toBe(
-      "Hola, le recuerdo los Bs 10 del tomate 🙂",
+      "Hola, le recuerdo los Bs\u00a010 del tomate 🙂",
     );
   });
 });
@@ -50,7 +50,7 @@ describe("WhatsApp", () => {
   });
 
   it("arma el enlace con el mensaje codificado", () => {
-    const msg = "Hola doña Rosa, le recuerdo los Bs 41 del pollo 🙂";
+    const msg = "Hola doña Rosa, le recuerdo los Bs\u00a041 del pollo 🙂";
     expect(enlaceWhatsApp(msg, "71234567")).toBe(`https://wa.me/59171234567?text=${encodeURIComponent(msg)}`);
     expect(enlaceWhatsApp(msg)).toBe(`https://wa.me/?text=${encodeURIComponent(msg)}`);
   });
@@ -67,7 +67,7 @@ describe("deudas con detalle", () => {
     expect(rosa.total).toBe(47);
     expect(rosa.productos).toEqual(["pollo", "papa"]);
     expect(rosa.apuntes.map((a) => a.total)).toEqual([6, 15, 26]);
-    expect(mensajeCobro(rosa)).toBe("Hola doña Rosa, le recuerdo los Bs 47 del pollo y de la papa 🙂");
+    expect(mensajeCobro(rosa)).toBe("Hola doña Rosa, le recuerdo los Bs\u00a047 del pollo y de la papa 🙂");
   });
 });
 
@@ -79,10 +79,10 @@ describe("generarReporte", () => {
 
   it("semanas, promedios, días trabajados y producto principal", () => {
     const movimientos = [
-      mov(dia(9, 6), "compra", "pollo", 20, 200),  // semana 1: Bs 10/kg
+      mov(dia(9, 6), "compra", "pollo", 20, 200),  // semana 1: Bs\u00a010/kg
       mov(dia(9), "venta", "pollo", 3, 45),        // +15
       mov(dia(11), "venta", "pollo", 2, 30),       // +10
-      mov(dia(16, 6), "compra", "pollo", 10, 120), // semana 2: Bs 12/kg (la del 9 ya tiene más de 7 días)
+      mov(dia(16, 6), "compra", "pollo", 10, 120), // semana 2: Bs\u00a012/kg (la del 9 ya tiene más de 7 días)
       mov(dia(16), "venta", "pollo", 2, 30),       // +6
       mov(dia(17), "fiado", "pollo", 1, 15, "doña Rosa"), // +3
       mov(dia(17, 11), "venta", "queso", 1, 20),   // sin compra: no entra en la ganancia

@@ -26,7 +26,7 @@ describe("generarMovimientosDemo", () => {
     expect(revisarMargen("pollo", { movimientos: demo, ahora: new Date(2026, 10, 13, 18, 0) })).toBeNull();
   });
 
-  it("semana 2: pierde Bs 4 por kilo de pollo", () => {
+  it("semana 2: pierde Bs\u00a04 por kilo de pollo", () => {
     expect(revisarMargen("pollo", { movimientos: demo, ahora: jueves })).toMatchObject({
       nivel: "perdida", costo: 17, precio: 13, diferenciaPorUnidad: -4, unidad: "kilo",
     });

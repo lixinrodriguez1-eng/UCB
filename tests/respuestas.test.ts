@@ -44,14 +44,14 @@ describe("fraseAlerta", () => {
   });
 
   it("usa 'la' para unidades femeninas y habla en la unidad base", () => {
-    // 2 docenas a Bs 24 = Bs 1 la unidad; media docena a Bs 5 = Bs 0,83 la unidad
+    // 2 docenas a Bs\u00a024 = Bs\u00a01 la unidad; media docena a Bs\u00a05 = Bs\u00a00,83 la unidad
     const movimientos = [
       mov(16, "compra", "pimentón", 2, "docena", 24),
       mov(17, "venta", "pimentón", 0.5, "docena", 5),
     ];
     const alerta = revisarMargen("pimentón", { movimientos, ahora: dia(17, 18) })!;
     expect(fraseAlerta(alerta)).toBe(
-      // Con el precio real del JSON: Bs 22,50 la docena = Bs 1,88 la unidad.
+      // Con el precio real del JSON: Bs\u00a022,50 la docena = Bs\u00a01,88 la unidad.
       "Ojo, caserita: la unidad de pimentón te sale a 1 peso y lo vendes a 83 centavos. " +
         "Estás perdiendo 17 centavos por unidad. En el mercado ya está a 1 con 88.",
     );
@@ -123,8 +123,8 @@ describe("detectarPregunta", () => {
 
 describe("responderPregunta", () => {
   const movimientos = [
-    mov(16, "compra", "pollo", 20, "kilo", 200), // Bs 10/kg
-    mov(16, "compra", "queso", 10, "kilo", 100), // Bs 10/kg
+    mov(16, "compra", "pollo", 20, "kilo", 200), // Bs\u00a010/kg
+    mov(16, "compra", "queso", 10, "kilo", 100), // Bs\u00a010/kg
     mov(17, "venta", "pollo", 3, "kilo", 45),    // gana 15
     mov(17, "venta", "queso", 2, "kilo", 28),    // gana 8
     mov(18, "fiado", "pollo", 2, "kilo", 30, "doña Rosa"), // gana 10
@@ -136,8 +136,8 @@ describe("responderPregunta", () => {
 
   it("¿cuánto gané hoy?", () => {
     const r = responderPregunta("ganancia-hoy", op);
-    expect(r.titulo).toBe("Hoy ganaste Bs 19");
-    expect(r.lineas).toEqual(["Vendiste Bs 59", "La mercadería te costó Bs 40"]);
+    expect(r.titulo).toBe("Hoy ganaste Bs\u00a019");
+    expect(r.lineas).toEqual(["Vendiste Bs\u00a059", "La mercadería te costó Bs\u00a040"]);
     expect(r.hablado).toBe(
       "Hoy ganaste 19 pesos, caserita. Vendiste 59 y la mercadería te costó 40. " +
         "No estoy contando charque porque no sé a cuánto lo compraste.",
@@ -146,13 +146,13 @@ describe("responderPregunta", () => {
 
   it("¿cuánto gané esta semana?", () => {
     const r = responderPregunta("ganancia-semana", op);
-    expect(r.titulo).toBe("Esta semana ganaste Bs 42");
+    expect(r.titulo).toBe("Esta semana ganaste Bs\u00a042");
   });
 
   it("¿qué me deja más?", () => {
     const r = responderPregunta("mas-rentable", op);
     expect(r.titulo).toBe("Lo que más te deja: pollo");
-    expect(r.lineas).toEqual(["pollo: ganas Bs 30", "queso: ganas Bs 12"]);
+    expect(r.lineas).toEqual(["pollo: ganas Bs\u00a030", "queso: ganas Bs\u00a012"]);
     expect(r.hablado).toBe(
       "Lo que más te deja esta semana es pollo: 30 pesos de ganancia. Le sigue queso con 12 pesos.",
     );
@@ -160,15 +160,15 @@ describe("responderPregunta", () => {
 
   it("¿quién me debe? junta al mismo cliente aunque cambie la mayúscula", () => {
     const r = responderPregunta("deudores", op);
-    expect(r.titulo).toBe("Te deben Bs 59");
-    expect(r.lineas).toEqual(["doña Rosa: Bs 45", "don Pedro: Bs 14"]);
+    expect(r.titulo).toBe("Te deben Bs\u00a059");
+    expect(r.lineas).toEqual(["doña Rosa: Bs\u00a045", "don Pedro: Bs\u00a014"]);
     expect(r.hablado).toBe("Te deben 59 pesos en total. doña Rosa, 45 pesos y don Pedro, 14 pesos.");
   });
 
   it("con una sola deudora no repite el monto", () => {
     const uno = [mov(18, "fiado", "pollo", 2, "kilo", 30, "doña Rosa")];
     const r = responderPregunta("deudores", { movimientos: uno, ahora: dia(18, 18) });
-    expect(r.titulo).toBe("Doña Rosa te debe Bs 30");
+    expect(r.titulo).toBe("Doña Rosa te debe Bs\u00a030");
     expect(r.hablado).toBe("Doña Rosa te debe 30 pesos, caserita.");
   });
 
@@ -182,7 +182,7 @@ describe("responderPregunta", () => {
   it("pérdida del día", () => {
     const perdida = [mov(18, "compra", "pollo", 10, "kilo", 170), mov(18, "venta", "pollo", 3, "kilo", 39)];
     expect(responderPregunta("ganancia-hoy", { movimientos: perdida, ahora: dia(18, 18) }).titulo)
-      .toBe("Hoy vas perdiendo Bs 12");
+      .toBe("Hoy vas perdiendo Bs\u00a012");
   });
 });
 

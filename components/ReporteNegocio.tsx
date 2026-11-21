@@ -211,7 +211,7 @@ export default function ReporteNegocio() {
                       style={{ width: `${(s.ventas / maxVentas) * 100}%` }}
                       aria-hidden="true"
                     />
-                    <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-base">
+                    <dl className="mt-2 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-base">
                       <dt>Ventas</dt>
                       <dd className="whitespace-nowrap text-right font-bold">{formatearBs(s.ventas)}</dd>
                       <dt>Compras</dt>
@@ -228,7 +228,7 @@ export default function ReporteNegocio() {
                 ))}
                 <li className="rounded-2xl border-4 border-tinta bg-crema p-4">
                   <p className="text-lg font-black">Total</p>
-                  <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-base font-bold">
+                  <dl className="mt-1 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-base font-bold">
                     <dt>Ventas</dt>
                     <dd className="whitespace-nowrap text-right">{formatearBs(r.ventasTotales)}</dd>
                     <dt>Compras</dt>

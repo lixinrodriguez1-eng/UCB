@@ -115,7 +115,7 @@ describe("deudas con pagos", () => {
   it("un pago parcial deja el apunte a medias en la lista", () => {
     const [rosa] = deudas({ movimientos, pagos: [pago(19, "doña Rosa", 10)], ahora });
     expect(rosa.apuntes.map((a) => a.total)).toEqual([15, 26]);
-    expect(mensajeCobro(rosa)).toBe("Hola doña Rosa, le recuerdo los Bs 31 del pollo 🙂");
+    expect(mensajeCobro(rosa)).toBe("Hola doña Rosa, le recuerdo los Bs\u00a031 del pollo 🙂");
   });
 
   it("quien paga todo sale de la lista", () => {
@@ -136,8 +136,8 @@ describe("deudas con pagos", () => {
 
   it("¿quién me debe? ya descuenta los pagos", () => {
     const r = responderPregunta("deudores", { movimientos, pagos: [pago(19, "doña Rosa", 20)], ahora });
-    expect(r.lineas).toEqual(["doña Rosa: Bs 21", "don Pedro: Bs 13"]);
-    expect(r.titulo).toBe("Te deben Bs 34");
+    expect(r.lineas).toEqual(["doña Rosa: Bs\u00a021", "don Pedro: Bs\u00a013"]);
+    expect(r.titulo).toBe("Te deben Bs\u00a034");
   });
 
   it("los pagos no cambian la ganancia ni las preguntas de ganancia", () => {

@@ -4,15 +4,15 @@ import { parsearFrase } from "@/lib/parser";
 
 describe("resumirMovimiento", () => {
   it.each([
-    ["Compré veinte kilos de pollo a doscientos pesos", "Compra · 20 kilos de pollo · Bs 200"],
-    ["Vendí 3 kilos de tomate a 21", "Venta · 3 kilos de tomate · Bs 21"],
-    ["Compré una arroba de papa a 50 bolivianos", "Compra · 1 arroba de papa · Bs 50"],
-    ["La doña Rosa se llevó apuntado un pollo entero a 41", "Fiado · 1 pollo entero · Bs 41 · doña Rosa"],
-    ["Vendí dos pollos enteros a 82", "Venta · 2 pollos enteros · Bs 82"],
-    ["Vendí media docena de pimentón a 12 por QR", "Venta · media docena de pimentón · Bs 12"],
-    ["Vendí medio kilo de queso a 20", "Venta · medio kilo de queso · Bs 20"],
-    ["Vendí 2 kilos y medio de cebolla a 45", "Venta · 2,5 kilos de cebolla · Bs 45"],
-    ["VENDÍ 5 LIMONES A 2", "Venta · 5 limones · Bs 2"],
+    ["Compré veinte kilos de pollo a doscientos pesos", "Compra · 20 kilos de pollo · Bs\u00a0200"],
+    ["Vendí 3 kilos de tomate a 21", "Venta · 3 kilos de tomate · Bs\u00a021"],
+    ["Compré una arroba de papa a 50 bolivianos", "Compra · 1 arroba de papa · Bs\u00a050"],
+    ["La doña Rosa se llevó apuntado un pollo entero a 41", "Fiado · 1 pollo entero · Bs\u00a041 · doña Rosa"],
+    ["Vendí dos pollos enteros a 82", "Venta · 2 pollos enteros · Bs\u00a082"],
+    ["Vendí media docena de pimentón a 12 por QR", "Venta · media docena de pimentón · Bs\u00a012"],
+    ["Vendí medio kilo de queso a 20", "Venta · medio kilo de queso · Bs\u00a020"],
+    ["Vendí 2 kilos y medio de cebolla a 45", "Venta · 2,5 kilos de cebolla · Bs\u00a045"],
+    ["VENDÍ 5 LIMONES A 2", "Venta · 5 limones · Bs\u00a02"],
   ])("%s → %s", (frase, esperado) => {
     expect(resumirMovimiento(parsearFrase(frase))).toBe(esperado);
   });
@@ -31,7 +31,7 @@ describe("pluralizar", () => {
 
 describe("formatearBs", () => {
   it.each([
-    [200, "Bs 200"], [0.4, "Bs 0,40"], [10.4, "Bs 10,40"], [4.19, "Bs 4,19"], [12.5, "Bs 12,50"],
+    [200, "Bs\u00a0200"], [0.4, "Bs\u00a00,40"], [10.4, "Bs\u00a010,40"], [4.19, "Bs\u00a04,19"], [12.5, "Bs\u00a012,50"],
   ])("%d → %s", async (n, esperado) => {
     const { formatearBs } = await import("@/lib/formato");
     expect(formatearBs(n)).toBe(esperado);

@@ -13,8 +13,8 @@ const mov = (
   fecha: string, tipo: Movimiento["tipo"], producto: string, cantidad: number, unidad: string, total: number,
 ): Movimiento => ({ id: `m${++n}`, fecha, tipo, producto, cantidad, unidad, total, pago: "efectivo" });
 
-const compraPolloKilo = mov(dia(16, 6), "compra", "pollo", 20, "kilo", 340); // Bs 17/kg
-const ventaPolloKilo = mov(dia(16, 9), "venta", "pollo", 3, "kilo", 39); // Bs 13/kg → pierde 4
+const compraPolloKilo = mov(dia(16, 6), "compra", "pollo", 20, "kilo", 340); // Bs\u00a017/kg
+const ventaPolloKilo = mov(dia(16, 9), "venta", "pollo", 3, "kilo", 39); // Bs\u00a013/kg → pierde 4
 const fiadoPolloEntero = { ...mov(dia(18, 9), "fiado", "pollo entero", 1, "unidad", 41), cliente: "doña Rosa" };
 
 describe("el parser los distingue", () => {
@@ -50,10 +50,10 @@ describe("costos y alertas por producto", () => {
   });
 
   it("con compras de pollo entero, se compara solo con esas", () => {
-    const conEnteros = [...movimientos, mov(dia(16, 7), "compra", "pollo entero", 10, "unidad", 300)]; // Bs 30 c/u
+    const conEnteros = [...movimientos, mov(dia(16, 7), "compra", "pollo entero", 10, "unidad", 300)]; // Bs\u00a030 c/u
     expect(costoPromedioPorUnidad("pollo entero", { movimientos: conEnteros, ahora })).toEqual({ valor: 30, unidad: "unidad" });
     expect(revisarMargen("pollo entero", { movimientos: conEnteros, ahora })).toBeNull(); // gana 11
-    const caro = [...movimientos, mov(dia(16, 7), "compra", "pollo entero", 10, "unidad", 450)]; // Bs 45 c/u
+    const caro = [...movimientos, mov(dia(16, 7), "compra", "pollo entero", 10, "unidad", 450)]; // Bs\u00a045 c/u
     expect(revisarMargen("pollo entero", { movimientos: caro, ahora })).toMatchObject({
       nivel: "perdida", unidad: "unidad", diferenciaPorUnidad: -4,
       referencia: { producto: "pollo entero", precio: 41, unidad: "unidad", fuente: "El Deber / eju.tv" },

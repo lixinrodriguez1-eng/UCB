@@ -31,8 +31,8 @@ function mov(
 /*
  * Escenario propio (NO es el del JSON): el pollo sube de precio en la semana 2
  * y la caserita lo sigue vendiendo al mismo precio.
- *   Semana 1: compra 20 kg a Bs 200 (Bs 10/kg) · vende 3 kg a Bs 39 (Bs 13/kg)
- *   Semana 2: compra 20 kg a Bs 340 (Bs 17/kg) · vende 3 kg a Bs 39 (Bs 13/kg)
+ *   Semana 1: compra 20 kg a Bs\u00a0200 (Bs\u00a010/kg) · vende 3 kg a Bs\u00a039 (Bs\u00a013/kg)
+ *   Semana 2: compra 20 kg a Bs\u00a0340 (Bs\u00a017/kg) · vende 3 kg a Bs\u00a039 (Bs\u00a013/kg)
  */
 const escenarioPollo: Movimiento[] = [
   mov(9, "compra", "pollo", 20, "kilo", 200, 6),
@@ -42,14 +42,14 @@ const escenarioPollo: Movimiento[] = [
 ];
 
 describe("escenario propio: el pollo sube y se sigue vendiendo igual", () => {
-  it("semana 1: costo Bs 10/kg, vende a Bs 13/kg → sin alerta", () => {
+  it("semana 1: costo Bs\u00a010/kg, vende a Bs\u00a013/kg → sin alerta", () => {
     const op = { movimientos: escenarioPollo, ahora: dia(10, 18) };
     expect(costoPromedioPorUnidad("pollo", op)).toEqual({ valor: 10, unidad: "kilo" });
     expect(precioVentaPorUnidad("pollo", op)?.valor).toBe(13);
     expect(revisarMargen("pollo", op)).toBeNull();
   });
 
-  it("semana 2: pierde Bs 4 por kilo", () => {
+  it("semana 2: pierde Bs\u00a04 por kilo", () => {
     const alerta = revisarMargen("pollo", { movimientos: escenarioPollo, ahora: dia(17, 18) });
     expect(alerta).toMatchObject({
       nivel: "perdida",
@@ -57,7 +57,7 @@ describe("escenario propio: el pollo sube y se sigue vendiendo igual", () => {
       costo: 17,
       precio: 13,
       diferenciaPorUnidad: -4,
-      titulo: "Estás perdiendo Bs 4 por kilo de pollo",
+      titulo: "Estás perdiendo Bs\u00a04 por kilo de pollo",
     });
   });
 
@@ -97,7 +97,7 @@ describe("conversión de unidades", () => {
       mov(16, "compra", "papa", 1, "arroba", 50),
       mov(17, "compra", "papa", 10, "kilo", 40),
     ];
-    // Bs 90 / 21,5 kg
+    // Bs\u00a090 / 21,5 kg
     expect(costoPromedioPorUnidad("papa", { movimientos, ahora: dia(17, 18) })).toEqual({
       valor: 4.19, unidad: "kilo",
     });
@@ -192,7 +192,7 @@ describe("escenario_demo_alerta_margen (caserita-datos-reales.json)", () => {
     expect(revisarMargen("pollo", { movimientos, ahora: dia(13, 18) })).toBeNull();
   });
 
-  it("la semana 2 da pérdida de Bs 4 por kilo, con el precio real del mercado y su fuente", () => {
+  it("la semana 2 da pérdida de Bs\u00a04 por kilo, con el precio real del mercado y su fuente", () => {
     const alerta = revisarMargen("pollo", { movimientos, ahora: dia(17, 18) });
     expect(alerta).toMatchObject({
       nivel: "perdida",

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { gananciaPorDia, type GananciaDia } from "@/lib/calculos";
-import { formatearBs } from "@/lib/formato";
+import { ESPACIO_FIJO, formatearBs } from "@/lib/formato";
 import { useAhora, useMovimientos } from "@/lib/useMovimientos";
 
 const DIAS_CORTOS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -16,9 +16,11 @@ function conSigno(n: number): string {
   return `${n > 0 ? "+" : "−"}${formatearBs(Math.abs(n))}`;
 }
 
-/** Versión corta para columnas angostas (celular): "+1,20", "−17,75". */
+/** Versión corta para columnas angostas (celular): "+1,20", "−17,75", "+126". */
 function conSignoCorto(n: number): string {
-  return conSigno(n).replace("Bs ", "");
+  // Desde 100 sin centavos, para que entre en la columna.
+  const valor = Math.abs(n) >= 100 ? Math.round(n) : n;
+  return conSigno(valor).replace(`Bs${ESPACIO_FIJO}`, "");
 }
 
 function textoDia(d: GananciaDia): string {

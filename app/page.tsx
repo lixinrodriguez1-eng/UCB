@@ -25,10 +25,19 @@ export default function Inicio() {
 
         <Resumen />
 
+        {/*
+          Celular: una columna (gráfico, me deben, crédito, movimientos).
+          Pantalla grande: arriba gráfico | me deben, abajo movimientos | crédito,
+          para que "Me deben" quede a la vista sin bajar.
+        */}
         <div className="mt-8 grid items-start gap-8 lg:grid-cols-2">
-          <div className="space-y-8">
+          <div className="lg:col-start-1 lg:row-start-1">
             <GraficoSemana />
+          </div>
+          <div className="lg:col-start-2 lg:row-start-1">
             <MeDeben />
+          </div>
+          <div className="lg:col-start-2 lg:row-start-2">
             <section
               aria-labelledby="titulo-credito"
               className="rounded-3xl border-4 border-tinta bg-azul-claro p-5"
@@ -48,7 +57,7 @@ export default function Inicio() {
               </Link>
             </section>
           </div>
-          <section aria-labelledby="titulo-movimientos">
+          <section aria-labelledby="titulo-movimientos" className="lg:col-start-1 lg:row-start-2">
             <h2 id="titulo-movimientos" className="mb-3 text-2xl font-extrabold">
               Movimientos
             </h2>

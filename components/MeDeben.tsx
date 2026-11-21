@@ -120,9 +120,10 @@ function FilaDeuda({
   };
 
   return (
-    <li className="p-4">
+    <li className="p-4 lg:py-2">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        {/* En pantalla grande: nombre, pagos y apuntes en una misma línea. */}
+        <div className="min-w-0 lg:flex lg:flex-wrap lg:items-baseline lg:gap-x-3">
           <p className="text-xl font-extrabold">{deuda.cliente}</p>
           {deuda.pagado > 0 && (
             <p className="text-base font-semibold text-verde">
@@ -154,13 +155,14 @@ function FilaDeuda({
         </ul>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2 lg:gap-1.5">
         <a
           href={enlaceWhatsApp(mensaje, celular)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-2xl border-4 border-tinta bg-verde px-4 py-2.5 text-lg font-extrabold text-white shadow-[0_4px_0_0_var(--tinta)] active:translate-y-1 active:shadow-none"
+          className="inline-flex items-center gap-2 rounded-2xl border-4 border-tinta bg-verde px-4 py-2.5 text-lg font-extrabold text-white shadow-[0_4px_0_0_var(--tinta)] active:translate-y-1 active:shadow-none lg:px-3 lg:py-1.5 lg:text-sm"
           aria-label={`Cobrar a ${deuda.cliente} por WhatsApp: ${mensaje}`}
+          title={mensaje}
         >
           <span aria-hidden="true">💬</span> Cobrar por WhatsApp
         </a>
@@ -168,7 +170,7 @@ function FilaDeuda({
           type="button"
           onClick={() => setCobrando((v) => !v)}
           aria-expanded={cobrando}
-          className="inline-flex items-center gap-2 rounded-2xl border-4 border-tinta bg-white px-4 py-2.5 text-lg font-extrabold shadow-[0_4px_0_0_var(--tinta)] active:translate-y-1 active:shadow-none"
+          className="inline-flex items-center gap-2 rounded-2xl border-4 border-tinta bg-white px-4 py-2.5 text-lg font-extrabold shadow-[0_4px_0_0_var(--tinta)] active:translate-y-1 active:shadow-none lg:px-3 lg:py-1.5 lg:text-sm"
         >
           <span aria-hidden="true">✅</span> Ya me pagó
         </button>
@@ -179,7 +181,7 @@ function FilaDeuda({
               setTexto(celular?.replace(/^591/, "") ?? "");
               setEditando(true);
             }}
-            className="rounded-xl px-2 py-1 text-base font-semibold text-tinta-suave underline"
+            className="rounded-xl px-2 py-1 text-base font-semibold text-tinta-suave underline lg:px-0 lg:text-sm"
           >
             {celular ? `📱 ${celular.replace(/^591/, "")}` : "📱 Agregar celular"}
           </button>
@@ -229,7 +231,7 @@ function FilaDeuda({
         </form>
       )}
 
-      <p className="mt-2 text-sm italic text-tinta-suave">“{mensaje}”</p>
+      <p className="mt-2 text-sm italic text-tinta-suave lg:hidden">“{mensaje}”</p>
     </li>
   );
 }
@@ -276,13 +278,14 @@ export default function MeDeben() {
         <p className="p-6 text-center text-lg text-tinta-suave">Nadie tiene apuntado. ¡Bien ahí!</p>
       ) : (
         <>
-          <ul className="divide-y-2 divide-crema-oscura">
+          <ul className="divide-y-2 divide-crema-oscura lg:max-h-[19rem] lg:overflow-y-auto">
             {lista.map((d) => (
               <FilaDeuda key={d.cliente} deuda={d} celular={celularDe(celulares, d.cliente)} onPagar={pagar} />
             ))}
           </ul>
           <p className="border-t-2 border-crema-oscura px-5 py-3 text-sm text-tinta-suave">
-            Ya descuenta lo que te pagaron. Toca “Ya me pagó” o dilo: “doña Rosa me pagó 20”.
+            Ya descuenta lo que te pagaron.
+            <span className="lg:hidden"> Toca “Ya me pagó” o dilo: “doña Rosa me pagó 20”.</span>
           </p>
         </>
       )}
