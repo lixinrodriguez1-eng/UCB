@@ -1,26 +1,71 @@
 @import "tailwindcss";
 
+/*
+ * Paleta cálida de mercado: fondo crema, tinta café oscura (alto contraste)
+ * y colores alegres de puesto. Solo tema claro: se lee mejor en proyector.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --crema: #fff8ec;
+  --crema-oscura: #f6e8cf;
+  --tinta: #2b1a0e;
+  --tinta-suave: #5c3d22;
+  --naranja: #e8590c;
+  --naranja-claro: #ffe0c2;
+  --amarillo: #ffc93c;
+  --amarillo-claro: #fff0bf;
+  --verde: #1f7a52;
+  --verde-claro: #d5f0de;
+  --rojo: #d1352b;
+  --rojo-claro: #fcd9d3;
+  --azul: #1c64c8;
+  --azul-claro: #dbe8fb;
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-crema: var(--crema);
+  --color-crema-oscura: var(--crema-oscura);
+  --color-tinta: var(--tinta);
+  --color-tinta-suave: var(--tinta-suave);
+  --color-naranja: var(--naranja);
+  --color-naranja-claro: var(--naranja-claro);
+  --color-amarillo: var(--amarillo);
+  --color-amarillo-claro: var(--amarillo-claro);
+  --color-verde: var(--verde);
+  --color-verde-claro: var(--verde-claro);
+  --color-rojo: var(--rojo);
+  --color-rojo-claro: var(--rojo-claro);
+  --color-azul: var(--azul);
+  --color-azul-claro: var(--azul-claro);
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Letras un poco más grandes; más todavía en pantallas grandes (proyector). */
+html {
+  font-size: 106.25%;
+}
+@media (min-width: 1024px) {
+  html {
+    font-size: 118.75%;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--crema);
+  color: var(--tinta);
+  font-family: var(--font-nunito), system-ui, sans-serif;
+}
+
+/* Impresión / PDF del reporte: papel blanco y márgenes de hoja A4. */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+@media print {
+  html {
+    font-size: 100%;
+  }
+  body {
+    background: #fff;
+  }
 }

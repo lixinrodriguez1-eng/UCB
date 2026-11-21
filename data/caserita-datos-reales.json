@@ -1,0 +1,55 @@
+{
+  "_nota": "Precios REALES publicados en prensa para mercados de Santa Cruz de la Sierra (precio al consumidor). Úsalos como precios de referencia y para el escenario de demo de la alerta de margen. Siempre citar la fuente en el pitch.",
+  "precios_referencia": [
+    { "producto": "pollo", "unidad": "kilo", "precio_antes": 12.5, "precio_ahora": 20.5, "mercado": "Abasto Minorista", "fecha": "2026-07-28", "fuente": "El Deber / eju.tv", "url": "https://eju.tv/?p=5048758", "comentario": "Subió de Bs 12–13 a Bs 20,50 en una semana tras los bloqueos" },
+    { "producto": "pollo entero", "unidad": "unidad", "precio_antes": 24, "precio_ahora": 41, "mercado": "Abasto Minorista", "fecha": "2026-07-28", "fuente": "El Deber / eju.tv", "url": "https://eju.tv/?p=5048758" },
+    { "producto": "tomate", "unidad": "kilo", "precio_antes": 4, "precio_ahora": 7, "mercado": "Abasto", "fecha": "2026-07-24", "fuente": "eju.tv", "url": "https://eju.tv/?p=5045702", "comentario": "La nota no especifica la unidad; se asume kilo para la demo" },
+    { "producto": "pepino", "unidad": "3 libras", "precio_antes": 5, "precio_ahora": 8, "mercado": "Abasto", "fecha": "2026-07-24", "fuente": "eju.tv", "url": "https://eju.tv/?p=5045702" },
+    { "producto": "zanahoria", "unidad": "3 libras", "precio_antes": null, "precio_ahora": 7, "mercado": "Abasto", "fecha": "2026-07-24", "fuente": "eju.tv", "url": "https://eju.tv/?p=5045702" },
+    { "producto": "locoto", "unidad": "3 libras", "precio_antes": 35, "precio_ahora": 10, "mercado": "Abasto", "fecha": "2026-07-24", "fuente": "eju.tv", "url": "https://eju.tv/?p=5045702", "comentario": "Bajó desde Bs 30–40 en semanas pico" },
+    { "producto": "papa", "unidad": "arroba", "precio_antes": null, "precio_ahora": 52.5, "rango": [45, 60], "mercado": "Abasto", "fecha": "2026-07-24", "fuente": "eju.tv", "url": "https://eju.tv/?p=5045702" },
+    { "producto": "brócoli", "unidad": "unidad", "precio_antes": null, "precio_ahora": 10, "mercado": "Abasto", "fecha": "2026-07-24", "fuente": "eju.tv", "url": "https://eju.tv/?p=5045702" },
+    { "producto": "pimentón", "unidad": "docena", "precio_antes": null, "precio_ahora": 22.5, "rango": [20, 25], "mercado": "Abasto", "fecha": "2026-07-24", "fuente": "eju.tv", "url": "https://eju.tv/?p=5045702" },
+    { "producto": "plátano beniano", "unidad": "docena", "precio_antes": null, "precio_ahora": 17.5, "rango": [15, 20], "mercado": "Abasto", "fecha": "2026-07-24", "fuente": "eju.tv", "url": "https://eju.tv/?p=5045702" }
+  ],
+
+  "unidades_locales": {
+    "kilo": { "kg": 1 },
+    "libra": { "kg": 0.46 },
+    "arroba": { "kg": 11.5, "nota": "25 libras" },
+    "cuartilla": { "kg": 2.875, "nota": "un cuarto de arroba" },
+    "docena": { "unidades": 12 },
+    "media docena": { "unidades": 6 },
+    "mano": { "nota": "racimo de plátano, cantidad variable" },
+    "bolsa": {}, "caja": {}, "lata": {}, "unidad": { "unidades": 1 }
+  },
+
+  "vocabulario": {
+    "venta": ["vendí", "vendi", "despaché", "se llevó"],
+    "compra": ["compré", "compre", "traje", "me trajeron", "pagué por"],
+    "fiado": ["apuntado", "fiado", "a cuenta", "me debe"],
+    "moneda": ["bolivianos", "pesos", "bs"],
+    "pago": ["qr", "efectivo", "al contado"]
+  },
+
+  "escenario_demo_alerta_margen": {
+    "_explicacion": "Basado en el alza real del pollo en julio 2026. Los precios de COMPRA son simulados (la prensa solo publica precio al consumidor).",
+    "semana_1": [
+      { "frase": "Compré veinte kilos de pollo a doscientos pesos", "tipo": "compra", "producto": "pollo", "cantidad": 20, "unidad": "kilo", "total": 200 },
+      { "frase": "Vendí tres kilos de pollo a treinta y nueve", "tipo": "venta", "producto": "pollo", "cantidad": 3, "unidad": "kilo", "total": 39 }
+    ],
+    "semana_2": [
+      { "frase": "Compré veinte kilos de pollo a trescientos cuarenta pesos", "tipo": "compra", "producto": "pollo", "cantidad": 20, "unidad": "kilo", "total": 340 },
+      { "frase": "Vendí tres kilos de pollo a treinta y nueve", "tipo": "venta", "producto": "pollo", "cantidad": 3, "unidad": "kilo", "total": 39 }
+    ],
+    "alerta_esperada": "Ojo, caserita: el kilo de pollo te sale ahora a 17 pesos y lo estás vendiendo a 13. ¡Estás perdiendo 4 pesos por kilo! En el mercado ya se vende a 20,50."
+  },
+
+  "datos_para_el_pitch": [
+    { "dato": "Bolivia tiene el mayor porcentaje de empleo informal de América Latina y el Caribe: 84,9% (OIT). Según el INE, la informalidad subió de 62,4% (2005) a 84,2% (2024).", "url": "https://eju.tv/?p=4616135" },
+    { "dato": "La inflación acumulada de 2025 fue 20,4%, la más alta en 36 años.", "url": "https://correodelsur.com/economia/20260107/inflacion-del-2025-fue-la-mas-alta-en-36-anos.html" },
+    { "dato": "En julio de 2026 el kilo de pollo en Santa Cruz subió de Bs 12 a Bs 20,50 en una semana, y las comerciantes dicen que bajaron las ventas.", "url": "https://eju.tv/?p=5048758" },
+    { "dato": "Según sindicatos gremiales, en Bolivia hay alrededor de medio millón de gremiales y comerciantes, el 70% en el eje central (La Paz, Cochabamba, Santa Cruz).", "url": "https://eju.tv/?p=1136270" },
+    { "dato": "Los prestamistas 'gota a gota' operan en Bolivia; en La Paz se detuvo a personas que hacían 'minipréstamos' con intereses del 40%.", "url": "https://insightcrime.org/es/noticias/analisis/bolivia-expansion-gota-a-gota-venezolanos/" }
+  ]
+}
