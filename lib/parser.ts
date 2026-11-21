@@ -1,5 +1,6 @@
 import type { FormaPago, Movimiento, TipoMovimiento } from "@/types/movimiento";
 import type { Vocabulario } from "@/types/vocabulario";
+import { CATALOGO, resolverCategoria } from "@/lib/catalogo";
 import { esPalabraNumero, leerNumero, leerYMedio } from "@/lib/numeros";
 import { vocabularioPorDefecto } from "@/lib/vocabulario";
 
@@ -142,6 +143,14 @@ function indexar(vocabulario: Vocabulario): Indices {
     for (const forma of [p.nombre, ...(p.sinonimos ?? [])]) {
       for (const v of variantes(forma)) {
         productos.set(v, p.nombre);
+        maxPalabrasProducto = Math.max(maxPalabrasProducto, v.split(" ").length);
+      }
+    }
+  }
+  for (const p of Array.isArray(CATALOGO) ? CATALOGO : []) {
+    for (const forma of [p.nombre, ...(p.sinonimos ?? [])]) {
+      for (const v of variantes(forma)) {
+        if (!productos.has(v)) productos.set(v, p.nombre);
         maxPalabrasProducto = Math.max(maxPalabrasProducto, v.split(" ").length);
       }
     }
@@ -423,6 +432,10 @@ export function parsearFrase(
   // --- Cliente ----------------------------------------------------------
   const cliente = detectarCliente(tokens, idx);
   if (cliente) resultado.cliente = cliente;
+
+  if (resultado.producto) {
+    resultado.categoria = resolverCategoria(resultado.producto).categoria;
+  }
 
   // --- Faltantes --------------------------------------------------------
   const requeridos: NombreCampo[] = ["tipo", "producto", "cantidad", "unidad", "total"];

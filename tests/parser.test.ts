@@ -5,21 +5,21 @@ import { leerNumero } from "@/lib/numeros";
 describe("parsearFrase — frases del enunciado", () => {
   it("compra de pollo con números en palabras y 'pesos'", () => {
     expect(parsearFrase("Compré veinte kilos de pollo a doscientos pesos")).toEqual({
-      tipo: "compra", producto: "pollo", cantidad: 20, unidad: "kilo",
+      tipo: "compra", producto: "pollo", categoria: "carnes", cantidad: 20, unidad: "kilo",
       total: 200, pago: "efectivo", faltantes: [],
     });
   });
 
   it("venta con dígitos", () => {
     expect(parsearFrase("Vendí 3 kilos de tomate a 21")).toEqual({
-      tipo: "venta", producto: "tomate", cantidad: 3, unidad: "kilo",
+      tipo: "venta", producto: "tomate", categoria: "verduras", cantidad: 3, unidad: "kilo",
       total: 21, pago: "efectivo", faltantes: [],
     });
   });
 
   it("arroba y 'bolivianos'", () => {
     expect(parsearFrase("Compré una arroba de papa a 50 bolivianos")).toEqual({
-      tipo: "compra", producto: "papa", cantidad: 1, unidad: "arroba",
+      tipo: "compra", producto: "papa", categoria: "tuberculos", cantidad: 1, unidad: "arroba",
       total: 50, pago: "efectivo", faltantes: [],
     });
   });
@@ -29,14 +29,14 @@ describe("parsearFrase — frases del enunciado", () => {
       parsearFrase("La doña Rosa se llevó apuntado un pollo entero a 41"),
     ).toEqual({
       // "pollo entero" (por unidad) es otro producto que "pollo" (por kilo)
-      tipo: "fiado", producto: "pollo entero", cantidad: 1, unidad: "unidad",
+      tipo: "fiado", producto: "pollo entero", categoria: "carnes", cantidad: 1, unidad: "unidad",
       total: 41, cliente: "doña Rosa", pago: "efectivo", faltantes: [],
     });
   });
 
   it("media docena pagada por QR", () => {
     expect(parsearFrase("Vendí media docena de pimentón a 12 por QR")).toEqual({
-      tipo: "venta", producto: "pimentón", cantidad: 0.5, unidad: "docena",
+      tipo: "venta", producto: "pimentón", categoria: "verduras", cantidad: 0.5, unidad: "docena",
       total: 12, pago: "qr", faltantes: [],
     });
   });
@@ -114,8 +114,8 @@ describe("parsearFrase — más casos", () => {
   });
 
   it("producto que no está en el vocabulario", () => {
-    expect(parsearFrase("Vendí 3 kilos de copoazú a 45")).toMatchObject({
-      tipo: "venta", producto: "copoazú", cantidad: 3, unidad: "kilo",
+    expect(parsearFrase("Vendí 3 kilos de zapirandanga a 45")).toMatchObject({
+      tipo: "venta", producto: "zapirandanga", categoria: "otros", cantidad: 3, unidad: "kilo",
       total: 45, faltantes: [],
     });
   });

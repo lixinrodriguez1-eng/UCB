@@ -4,6 +4,7 @@ import { datosMercadoPorDefecto } from "@/lib/datosMercado";
 import { obtenerMovimientos, obtenerPagos } from "@/lib/storage";
 import { normalizar, TITULOS } from "@/lib/parser";
 import { formatearBs, formatearNumero } from "@/lib/formato";
+import { categoriaPorId, resolverCategoria } from "@/lib/catalogo";
 
 /**
  * Todas las funciones leen de localStorage por defecto, pero aceptan
@@ -260,6 +261,32 @@ export function gananciaPorProducto(op: OpcionesCalculo = {}): GananciaProducto[
       ganancia: redondear(f.ingresos - f.costo),
     }))
     .sort((a, b) => b.ganancia - a.ganancia);
+}
+
+export interface VentaCategoria {
+  categoria: string;
+  nombre: string;
+  icono: string;
+  total: number;
+}
+
+/** Ventas (y fiados) de hoy agrupadas por categoría. */
+export function ventasPorCategoria(op: OpcionesCalculo = {}): VentaCategoria[] {
+  const { movimientos, ahora } = resolver(op);
+  const desde = inicioDelDia(ahora).getTime();
+  const porCategoria = new Map<string, number>();
+  for (const m of movimientos) {
+    const t = new Date(m.fecha).getTime();
+    if (!esVenta(m) || t < desde || t > ahora.getTime()) continue;
+    const cat = m.categoria ?? resolverCategoria(m.producto).categoria;
+    porCategoria.set(cat, (porCategoria.get(cat) ?? 0) + m.total);
+  }
+  return [...porCategoria.entries()]
+    .map(([id, total]) => {
+      const c = categoriaPorId(id);
+      return { categoria: id, nombre: c.nombre, icono: c.icono, total: redondear(total) };
+    })
+    .sort((a, b) => b.total - a.total);
 }
 
 // ---------------------------------------------------------------------------

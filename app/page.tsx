@@ -7,6 +7,7 @@ import GraficoSemana from "@/components/GraficoSemana";
 import MeDeben from "@/components/MeDeben";
 import ListaMovimientos from "@/components/ListaMovimientos";
 import Resumen from "@/components/Resumen";
+import VentasPorCategoria from "@/components/VentasPorCategoria";
 
 export default function Inicio() {
   return (
@@ -34,8 +35,9 @@ export default function Inicio() {
           <div className="lg:col-start-1 lg:row-start-1">
             <GraficoSemana />
           </div>
-          <div className="lg:col-start-2 lg:row-start-1">
+          <div className="lg:col-start-2 lg:row-start-1 space-y-4">
             <MeDeben />
+            <VentasPorCategoria />
           </div>
           <div className="lg:col-start-2 lg:row-start-2">
             <section

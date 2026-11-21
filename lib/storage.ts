@@ -1,4 +1,5 @@
 import type { Movimiento, NuevoMovimiento, NuevoPago, Pago } from "@/types/movimiento";
+import { recordarProducto, resolverCategoria } from "@/lib/catalogo";
 
 const CLAVE_MOVIMIENTOS = "caserita:movimientos";
 const CLAVE_PAGOS = "caserita:pagos";
@@ -45,12 +46,15 @@ function guardarMovimientos(movimientos: Movimiento[]): void {
 
 /** Agrega un movimiento y lo devuelve con su id y fecha. */
 export function agregarMovimiento(nuevo: NuevoMovimiento): Movimiento {
+  const categoria = nuevo.categoria ?? resolverCategoria(nuevo.producto).categoria;
   const movimiento: Movimiento = {
     ...nuevo,
+    categoria,
     id: generarId(),
     fecha: nuevo.fecha ?? new Date().toISOString(),
   };
   guardarMovimientos([movimiento, ...obtenerMovimientos()]);
+  recordarProducto(movimiento.producto, categoria);
   return movimiento;
 }
 

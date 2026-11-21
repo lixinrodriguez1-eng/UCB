@@ -15,6 +15,7 @@ import TarjetaConfirmacion from "@/components/TarjetaConfirmacion";
 import TarjetaAlerta from "@/components/TarjetaAlerta";
 import TarjetaRespuesta from "@/components/TarjetaRespuesta";
 import TarjetaPago from "@/components/TarjetaPago";
+import RegistroManual from "@/components/RegistroManual";
 import { detectarPago, registrarPago, type PagoDetectado } from "@/lib/pagos";
 import type { FormaPago } from "@/types/movimiento";
 import { revisarMargen, type AlertaMargen } from "@/lib/calculos";
@@ -43,6 +44,7 @@ export default function BotonMicrofono() {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [forzarTexto, setForzarTexto] = useState(false);
   const [escrito, setEscrito] = useState("");
+  const [manual, setManual] = useState(false);
   const escucha = useRef<ControlEscucha | null>(null);
 
   // Si se desmonta mientras escucha, cortar el micrófono.
@@ -183,6 +185,9 @@ export default function BotonMicrofono() {
                 >
                   Registrar
                 </button>
+                <button type="button" onClick={() => setManual(true)} className="rounded-2xl border-4 border-tinta bg-white px-4 text-lg font-bold">
+                  Elegir producto
+                </button>
                 {soportada && (
                   <button
                     type="button"
@@ -230,13 +235,14 @@ export default function BotonMicrofono() {
                 <p className="text-center text-base font-bold text-tinta sm:text-lg lg:text-left">
                   {escuchando ? "Toca para terminar" : "Toca y dime qué vendiste o pregúntame"}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setForzarTexto(true)}
-                  className="text-base font-semibold text-tinta-suave underline"
-                >
-                  Prefiero escribir
-                </button>
+                <div className="flex gap-4">
+                  <button type="button" onClick={() => setForzarTexto(true)} className="text-base font-semibold text-tinta-suave underline">
+                    Prefiero escribir
+                  </button>
+                  <button type="button" onClick={() => setManual(true)} className="text-base font-semibold text-tinta-suave underline">
+                    Elegir producto
+                  </button>
+                </div>
               </div>
             </>
           )}
@@ -274,6 +280,16 @@ export default function BotonMicrofono() {
           respuesta={fase.respuesta}
           onRepetir={() => hablar(fase.respuesta.hablado)}
           onCerrar={cerrar}
+        />
+      )}
+
+      {manual && (
+        <RegistroManual
+          onElegir={(producto, categoria) => {
+            setManual(false);
+            setFase({ tipo: "confirmando", texto: producto, resultado: { tipo: "venta", producto, categoria, unidad: "kilo", pago: "efectivo", faltantes: ["cantidad", "total"] } });
+          }}
+          onCerrar={() => setManual(false)}
         />
       )}
     </>

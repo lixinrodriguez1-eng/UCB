@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { TipoMovimiento } from "@/types/movimiento";
 import type { CampoParseado, NombreCampo, ResultadoParseo } from "@/lib/parser";
+import { CATEGORIAS, etiquetaCategoria, establecerCategoriaProducto } from "@/lib/catalogo";
 import { etiquetaTipo, resumirMovimiento } from "@/lib/formato";
 import { vocabularioPorDefecto } from "@/lib/vocabulario";
 
@@ -27,6 +28,8 @@ const claseInput =
 export default function TarjetaConfirmacion({ texto, resultado, onConfirmar, onCancelar }: Props) {
   const [tipo, setTipo] = useState<TipoMovimiento | undefined>(resultado.tipo);
   const [producto, setProducto] = useState(resultado.producto ?? "");
+  const [categoria, setCategoria] = useState(resultado.categoria ?? "otros");
+  const [editandoCategoria, setEditandoCategoria] = useState(false);
   const [cantidad, setCantidad] = useState(resultado.cantidad?.toString() ?? "");
   const [unidad, setUnidad] = useState(resultado.unidad ?? "kilo");
   const [total, setTotal] = useState(resultado.total?.toString() ?? "");
@@ -43,6 +46,7 @@ export default function TarjetaConfirmacion({ texto, resultado, onConfirmar, onC
   const datos: Partial<CampoParseado> = {
     tipo,
     producto: producto.trim() || undefined,
+    categoria,
     cantidad: aNumero(cantidad),
     unidad: unidad || undefined,
     total: aNumero(total),
@@ -59,7 +63,9 @@ export default function TarjetaConfirmacion({ texto, resultado, onConfirmar, onC
     (datos.tipo !== "fiado" || datos.cliente !== undefined);
 
   const confirmar = () => {
-    if (completo) onConfirmar(datos as CampoParseado);
+    if (!completo) return;
+    if (datos.producto) establecerCategoriaProducto(datos.producto, categoria);
+    onConfirmar(datos as CampoParseado);
   };
 
   return (
@@ -83,6 +89,32 @@ export default function TarjetaConfirmacion({ texto, resultado, onConfirmar, onC
         <p className="mt-2 text-2xl font-semibold leading-snug" aria-live="polite">
           {resumirMovimiento(datos) || "No entendí bien, ayúdame con los datos"}
         </p>
+
+        {datos.producto && (
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setEditandoCategoria((v) => !v)}
+              className="rounded-full border-2 border-tinta/20 bg-white px-3 py-1 text-base font-bold"
+            >
+              {etiquetaCategoria(categoria)} <span className="text-tinta-suave">cambiar</span>
+            </button>
+            {editandoCategoria && (
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {CATEGORIAS.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => { setCategoria(c.id); setEditandoCategoria(false); }}
+                    className={`rounded-xl border-2 px-2 py-2 text-left text-sm font-bold ${categoria === c.id ? "border-verde bg-verde-claro" : "border-tinta/20 bg-white"}`}
+                  >
+                    {c.icono} {c.nombre}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {pidiendoAlgo && (
           <div className="mt-6 space-y-5">

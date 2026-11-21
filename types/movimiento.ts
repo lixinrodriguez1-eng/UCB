@@ -11,6 +11,8 @@ export interface Movimiento {
   fecha: string;
   tipo: TipoMovimiento;
   producto: string;
+  /** Categoría automática del producto (ej. "verduras"). */
+  categoria?: string;
   cantidad: number;
   /** Unidad de medida: "kg", "arroba", "unidad", "docena", etc. */
   unidad: string;
