@@ -52,6 +52,8 @@ export default function TarjetaConfirmacion({ texto, resultado, onConfirmar, onC
     total: aNumero(total),
     cliente: cliente.trim() || undefined,
     pago: resultado.pago ?? "efectivo",
+    // "don Juan me debe 30": deuda sin detalle (no cuenta como venta de hoy)
+    ...(resultado.soloDeuda ? { soloDeuda: true } : {}),
   };
 
   const completo =

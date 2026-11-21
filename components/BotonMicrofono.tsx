@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { parsearFrase, type CampoParseado, type ResultadoParseo } from "@/lib/parser";
+import { dividirFrase, parsearFrase, type CampoParseado, type ResultadoParseo } from "@/lib/parser";
+import TarjetaPedido from "@/components/TarjetaPedido";
+import { compararOfertas, detectarPedido, type ItemPedidoDicho } from "@/lib/pedidos";
+import { pesosHablados } from "@/lib/respuestas";
 import { agregarMovimiento } from "@/lib/storage";
 import { resumirMovimiento } from "@/lib/formato";
 import {
@@ -29,12 +32,14 @@ type Fase =
   | { tipo: "confirmando"; texto: string; resultado: ResultadoParseo }
   | { tipo: "alerta"; alerta: AlertaMargen }
   | { tipo: "respuesta"; pregunta: string; respuesta: Respuesta }
-  | { tipo: "pago"; texto: string; detectado: PagoDetectado };
+  | { tipo: "pago"; texto: string; detectado: PagoDetectado }
+  | { tipo: "pedido"; texto: string; items: ItemPedidoDicho[] };
 
 // El soporte de voz no cambia durante la sesión: no hay nada a qué suscribirse.
 const sinSuscripcion = () => () => {};
+const SOPORTE_EN_SERVIDOR = null;
 /** En el servidor todavía no se sabe (null). */
-const soporteEnServidor = () => null;
+const soporteEnServidor = () => SOPORTE_EN_SERVIDOR;
 
 export default function BotonMicrofono() {
   const soportada = useSyncExternalStore(sinSuscripcion, vozSoportada, soporteEnServidor);
@@ -46,15 +51,47 @@ export default function BotonMicrofono() {
   const [escrito, setEscrito] = useState("");
   const [manual, setManual] = useState(false);
   const escucha = useRef<ControlEscucha | null>(null);
+  // "Vendí 2 kilos de papa a 9 pesos y don Juan me debe 30": lo que falta procesar.
+  const pendientes = useRef<string[]>([]);
 
   // Si se desmonta mientras escucha, cortar el micrófono.
   useEffect(() => () => escucha.current?.cancelar(), []);
 
   const modoTexto = soportada === false || forzarTexto;
 
+  /** Sigue con la próxima parte de la frase, o vuelve a esperar. */
+  const siguiente = () => {
+    const proxima = pendientes.current.shift();
+    if (proxima) procesarParte(proxima);
+    else setFase({ tipo: "inactivo" });
+  };
+
   const procesar = (texto: string) => {
     const limpio = texto.trim();
     if (!limpio) return;
+    // "Para mañana necesito un quintal de papa…": pedido a productores.
+    const pedido = detectarPedido(limpio);
+    if (pedido) {
+      pendientes.current = [];
+      setEscrito("");
+      setFase({ tipo: "pedido", texto: limpio, items: pedido });
+      const [primero] = pedido;
+      const mejor = compararOfertas(primero)[0];
+      if (mejor) {
+        hablar(
+          `Para ${primero.producto}, lo más barato es ${mejor.productor.nombre}: ${pesosHablados(mejor.costo)}.` +
+            (mejor.teDeja !== null ? ` Te deja ${pesosHablados(mejor.teDeja)}.` : ""),
+        );
+      }
+      return;
+    }
+    // Varias cosas en una frase: se registran de a una.
+    const [primera, ...resto] = dividirFrase(limpio);
+    pendientes.current = resto;
+    procesarParte(primera);
+  };
+
+  const procesarParte = (limpio: string) => {
     // "Doña Rosa me pagó 20": pago de lo apuntado.
     const pago = detectarPago(limpio);
     if (pago) {
@@ -108,8 +145,12 @@ export default function BotonMicrofono() {
     agregarMovimiento(datos); // la lista se actualiza sola al cambiar el storage
     // Después de cada compra o venta, ¿está perdiendo plata con este producto?
     const alerta = revisarMargen(datos.producto);
-    setFase(alerta ? { tipo: "alerta", alerta } : { tipo: "inactivo" });
-    if (alerta) hablar(fraseAlerta(alerta));
+    if (alerta) {
+      setFase({ tipo: "alerta", alerta });
+      hablar(fraseAlerta(alerta));
+    } else {
+      siguiente();
+    }
     setTextoParcial("");
     setEscrito("");
     setMensaje(`✅ Registrado: ${resumirMovimiento(datos)}`);
@@ -118,21 +159,21 @@ export default function BotonMicrofono() {
   const confirmarPago = (cliente: string, monto: number, forma: FormaPago) => {
     const { saldo } = registrarPago(cliente, monto, forma);
     const frase = fraseSaldo(cliente, saldo);
-    setFase({ tipo: "inactivo" });
+    siguiente();
     setTextoParcial("");
     setMensaje(`✅ ${frase}`);
     hablar(frase);
   };
 
   const cancelar = () => {
-    setFase({ tipo: "inactivo" });
+    siguiente();
     setTextoParcial("");
     setMensaje(null);
   };
 
   const cerrar = () => {
     callar();
-    setFase({ tipo: "inactivo" });
+    siguiente();
   };
 
   const escuchando = fase.tipo === "escuchando";
@@ -215,7 +256,7 @@ export default function BotonMicrofono() {
                 <button
                   type="button"
                   onClick={alTocar}
-                  disabled={soportada === null || fase.tipo === "confirmando" || fase.tipo === "alerta" || fase.tipo === "respuesta" || fase.tipo === "pago"}
+                  disabled={soportada === null || fase.tipo === "confirmando" || fase.tipo === "alerta" || fase.tipo === "respuesta" || fase.tipo === "pago" || fase.tipo === "pedido"}
                   aria-pressed={escuchando}
                   aria-label={escuchando ? "Dejar de escuchar" : "Hablar para registrar"}
                   className={`relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-tinta text-white shadow-[0_6px_0_0_var(--tinta)] transition active:translate-y-1 active:shadow-none disabled:opacity-60 lg:h-28 lg:w-28 ${
@@ -262,6 +303,10 @@ export default function BotonMicrofono() {
 
       {fase.tipo === "alerta" && (
         <TarjetaAlerta alerta={fase.alerta} onCerrar={cerrar} />
+      )}
+
+      {fase.tipo === "pedido" && (
+        <TarjetaPedido key={fase.texto} texto={fase.texto} items={fase.items} onCerrar={cerrar} />
       )}
 
       {fase.tipo === "pago" && (

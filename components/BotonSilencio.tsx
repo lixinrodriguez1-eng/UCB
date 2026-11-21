@@ -4,7 +4,8 @@ import { useSyncExternalStore } from "react";
 import { estaSilenciado, hablaSoportada, silenciar, suscribirSilencio } from "@/lib/habla";
 
 const sinSuscripcion = () => () => {};
-const enServidor = () => null;
+const EN_SERVIDOR = null;
+const enServidor = () => EN_SERVIDOR;
 
 /** Prende o apaga las respuestas habladas. Se recuerda en este celular. */
 export default function BotonSilencio() {

@@ -1,5 +1,6 @@
 import type { Movimiento, NuevoMovimiento, NuevoPago, Pago } from "@/types/movimiento";
 import { recordarProducto, resolverCategoria } from "@/lib/catalogo";
+import { CLAVES_DE_DATOS } from "@/lib/almacen";
 
 const CLAVE_MOVIMIENTOS = "caserita:movimientos";
 const CLAVE_PAGOS = "caserita:pagos";
@@ -86,6 +87,8 @@ export function borrarTodo(): void {
   if (!hayStorage()) return;
   window.localStorage.removeItem(CLAVE_MOVIMIENTOS);
   window.localStorage.removeItem(CLAVE_PAGOS);
+  // Pedidos, reservas, precios publicados y estrellas (el rol elegido se queda).
+  for (const clave of CLAVES_DE_DATOS) window.localStorage.removeItem(clave);
   window.dispatchEvent(new Event(EVENTO_CAMBIO));
 }
 
@@ -140,15 +143,18 @@ export function suscribirMovimientos(alCambiar: () => void): () => void {
   };
 }
 
+const SIN_MOVIMIENTOS: Movimiento[] = Object.freeze([]) as unknown as Movimiento[];
+const SIN_PAGOS: Pago[] = Object.freeze([]) as unknown as Pago[];
+
 let ultimoCrudo: string | null | undefined;
-let ultimaLista: Movimiento[] = [];
+let ultimaLista: Movimiento[] = SIN_MOVIMIENTOS;
 
 /**
  * Igual que obtenerMovimientos, pero devuelve el mismo arreglo mientras
  * los datos no cambien (useSyncExternalStore lo necesita así).
  */
 export function obtenerMovimientosEnCache(): Movimiento[] {
-  if (!hayStorage()) return ultimaLista;
+  if (!hayStorage()) return SIN_MOVIMIENTOS;
   const crudo = window.localStorage.getItem(CLAVE_MOVIMIENTOS);
   if (crudo !== ultimoCrudo) {
     ultimoCrudo = crudo;
@@ -157,12 +163,20 @@ export function obtenerMovimientosEnCache(): Movimiento[] {
   return ultimaLista;
 }
 
+export function movimientosEnServidor(): Movimiento[] {
+  return SIN_MOVIMIENTOS;
+}
+
+export function pagosEnServidor(): Pago[] {
+  return SIN_PAGOS;
+}
+
 let ultimoCrudoPagos: string | null | undefined;
-let ultimosPagos: Pago[] = [];
+let ultimosPagos: Pago[] = SIN_PAGOS;
 
 /** Igual que obtenerPagos, pero con el mismo arreglo mientras no cambien. */
 export function obtenerPagosEnCache(): Pago[] {
-  if (!hayStorage()) return ultimosPagos;
+  if (!hayStorage()) return SIN_PAGOS;
   const crudo = window.localStorage.getItem(CLAVE_PAGOS);
   if (crudo !== ultimoCrudoPagos) {
     ultimoCrudoPagos = crudo;

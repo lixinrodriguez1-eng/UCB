@@ -52,6 +52,8 @@ export function describirCantidad(
   unidad: string,
   producto: string,
 ): string {
+  // Deuda dicha sin detalle ("don Juan me debe 30").
+  if (producto === "deuda") return "deuda";
   if (unidad === "unidad") {
     return `${formatearNumero(cantidad)} ${cantidad === 1 ? producto : pluralizar(producto)}`;
   }

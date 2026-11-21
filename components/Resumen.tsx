@@ -48,7 +48,7 @@ export default function Resumen() {
     if (!movimientos || !pagos || !ahora) return null;
     const op = { movimientos, pagos, ahora };
     const ventasHoy = movimientos.filter(
-      (m) => (m.tipo === "venta" || m.tipo === "fiado") && new Date(m.fecha).toDateString() === ahora.toDateString(),
+      (m) => (m.tipo === "venta" || m.tipo === "fiado") && !m.soloDeuda && new Date(m.fecha).toDateString() === ahora.toDateString(),
     ).length;
     const lista = deudas(op);
     return {

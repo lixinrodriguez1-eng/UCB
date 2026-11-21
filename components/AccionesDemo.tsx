@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { generarMovimientosDemo } from "@/lib/demo";
+import { cargarDemoCompleto } from "@/lib/demoCompleto";
 import { borrarTodo, reemplazarMovimientos, reemplazarPagos } from "@/lib/storage";
 import { useMovimientos, usePagos } from "@/lib/useMovimientos";
 import { contar, contarRegistros } from "@/lib/formato";
 
-type Pendiente = "demo" | "borrar" | null;
+type Pendiente = "demo" | "completo" | "borrar" | null;
 
 /** Botones discretos para el pitch: cargar el demo y borrar todo. */
 export default function AccionesDemo() {
@@ -27,6 +28,15 @@ export default function AccionesDemo() {
     reemplazarPagos([]); // el demo arranca sin pagos
     setPendiente(null);
     setAviso(`Demo cargada: ${contar(demo.length, "movimiento")} de la semana pasada y de esta semana.`);
+  };
+
+  // El demo de siempre + precios publicados, estrellas y reservas de ejemplo.
+  const cargarCompleto = () => {
+    const d = cargarDemoCompleto(new Date());
+    setPendiente(null);
+    setAviso(
+      `Demo completo cargado: ${contar(d.movimientos.length, "movimiento")}, ${contar(d.publicados.length, "precio publicado", "precios publicados")}, ${contar(d.reservas.length, "reserva")} de familias y productores de ejemplo.`,
+    );
   };
 
   const borrar = () => {
@@ -53,6 +63,17 @@ export default function AccionesDemo() {
           >
             Modo demo
           </button>
+          <button
+            type="button"
+            className={botonDiscreto}
+            onClick={() => {
+              setAviso(null);
+              if (cantidad === 0) cargarCompleto();
+              else setPendiente("completo");
+            }}
+          >
+            Modo demo completo
+          </button>
           {cantidad > 0 && (
             <button
               type="button"
@@ -69,17 +90,17 @@ export default function AccionesDemo() {
       ) : (
         <div className="mx-auto max-w-md rounded-2xl border-2 border-tinta bg-white p-4" role="group">
           <p className="text-lg font-bold">
-            {pendiente === "demo"
-              ? `Esto reemplaza lo que tienes (${registros}) por los datos del demo. ¿Seguimos?`
+            {pendiente === "demo" || pendiente === "completo"
+              ? `Esto reemplaza lo que tienes (${registros}) por los datos del demo${pendiente === "completo" ? " completo" : ""}. ¿Seguimos?`
               : `¿Borrar ${registros}? No se puede deshacer.`}
           </p>
           <div className="mt-3 flex justify-center gap-3">
             <button
               type="button"
-              onClick={pendiente === "demo" ? cargarDemo : borrar}
-              className={`rounded-xl px-5 py-2 text-lg font-bold text-white ${pendiente === "demo" ? "bg-azul" : "bg-rojo"}`}
+              onClick={pendiente === "demo" ? cargarDemo : pendiente === "completo" ? cargarCompleto : borrar}
+              className={`rounded-xl px-5 py-2 text-lg font-bold text-white ${pendiente === "borrar" ? "bg-rojo" : "bg-azul"}`}
             >
-              {pendiente === "demo" ? "Sí, cargar demo" : "Sí, borrar"}
+              {pendiente === "borrar" ? "Sí, borrar" : "Sí, cargar demo"}
             </button>
             <button
               type="button"

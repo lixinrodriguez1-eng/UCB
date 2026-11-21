@@ -3,7 +3,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { deudas, type Deuda } from "@/lib/calculos";
 import { enlaceWhatsApp, mensajeCobro, normalizarCelular } from "@/lib/cobros";
-import { celularDe, guardarCelular, obtenerCelulares, suscribirCelulares } from "@/lib/contactos";
+import { celularDe, guardarCelular, obtenerCelulares, sinCelulares, suscribirCelulares } from "@/lib/contactos";
 import { describirCantidad, formatearBs } from "@/lib/formato";
 import { useAhora, useMovimientos, usePagos } from "@/lib/useMovimientos";
 import { registrarPago } from "@/lib/pagos";
@@ -12,7 +12,6 @@ import { hablar } from "@/lib/habla";
 import type { FormaPago } from "@/types/movimiento";
 
 const formatoFecha = new Intl.DateTimeFormat("es-BO", { weekday: "short", day: "numeric", month: "short" });
-const sinCelulares = () => ({});
 
 function PanelPago({
   deuda,

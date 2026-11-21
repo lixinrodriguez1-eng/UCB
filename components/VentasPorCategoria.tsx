@@ -5,10 +5,10 @@ import { ventasPorCategoria } from "@/lib/calculos";
 import { obtenerMovimientosEnCache, obtenerPagosEnCache, suscribirMovimientos } from "@/lib/storage";
 import { formatearBs } from "@/lib/formato";
 
-const vacioM: [] = [];
-const vacioP: [] = [];
-const servidorM = () => vacioM;
-const servidorP = () => vacioP;
+const SIN_M: [] = Object.freeze([]) as [];
+const SIN_P: [] = Object.freeze([]) as [];
+const servidorM = () => SIN_M;
+const servidorP = () => SIN_P;
 
 function ContenidoVentasPorCategoria() {
   const movimientos = useSyncExternalStore(suscribirMovimientos, obtenerMovimientosEnCache, servidorM);

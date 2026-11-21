@@ -9,8 +9,8 @@ interface Props {
   onCerrar: () => void;
 }
 
-const vacio: [] = [];
-const servidor = () => vacio;
+const SIN_MOVIMIENTOS: [] = Object.freeze([]) as [];
+const servidor = () => SIN_MOVIMIENTOS;
 
 function masUsados(movs: { producto: string }[], limite = 6): string[] {
   const c = new Map<string, { nombre: string; n: number }>();

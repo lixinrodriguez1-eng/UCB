@@ -39,7 +39,7 @@ export interface ReporteNegocio {
 }
 
 const redondear = (x: number) => Math.round(x * 100) / 100;
-const esVenta = (m: Movimiento) => m.tipo === "venta" || m.tipo === "fiado";
+const esVenta = (m: Movimiento) => (m.tipo === "venta" || m.tipo === "fiado") && !m.soloDeuda;
 const claveDia = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
 function lunesDe(fecha: Date): Date {

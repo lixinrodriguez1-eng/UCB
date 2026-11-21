@@ -21,7 +21,7 @@ function leerPerfil(): Perfil {
     const crudo = window.localStorage.getItem(CLAVE_PERFIL);
     if (crudo !== crudoPerfil) {
       crudoPerfil = crudo;
-      perfilCache = crudo ? { ...PERFIL_VACIO, ...(JSON.parse(crudo) as Partial<Perfil>) } : PERFIL_VACIO;
+      perfilCache = crudo ? Object.freeze({ ...PERFIL_VACIO, ...(JSON.parse(crudo) as Partial<Perfil>) }) as Perfil : PERFIL_VACIO;
     }
   } catch {
     // sin storage
@@ -38,7 +38,11 @@ function guardarPerfil(perfil: Perfil) {
 }
 function suscribirPerfil(alCambiar: () => void) {
   window.addEventListener(EVENTO_PERFIL, alCambiar);
-  return () => window.removeEventListener(EVENTO_PERFIL, alCambiar);
+  window.addEventListener("storage", alCambiar);
+  return () => {
+    window.removeEventListener(EVENTO_PERFIL, alCambiar);
+    window.removeEventListener("storage", alCambiar);
+  };
 }
 const perfilEnServidor = () => PERFIL_VACIO;
 

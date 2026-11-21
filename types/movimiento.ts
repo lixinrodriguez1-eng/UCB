@@ -20,6 +20,11 @@ export interface Movimiento {
   total: number;
   cliente?: string;
   pago: FormaPago;
+  /**
+   * Deuda dicha sin detalle ("don Juan me debe 30"): suma en "Me deben"
+   * pero no cuenta como venta de hoy ni entra en la ganancia.
+   */
+  soloDeuda?: boolean;
 }
 
 /** Datos para crear un movimiento nuevo (el id y la fecha se generan solos). */

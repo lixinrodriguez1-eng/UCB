@@ -11,7 +11,8 @@ interface Props {
   onCerrar: () => void;
 }
 
-const silencioEnServidor = () => true;
+const SILENCIO_EN_SERVIDOR = true;
+const silencioEnServidor = () => SILENCIO_EN_SERVIDOR;
 
 export default function TarjetaRespuesta({ pregunta, respuesta, onRepetir, onCerrar }: Props) {
   const silenciado = useSyncExternalStore(suscribirSilencio, estaSilenciado, silencioEnServidor);

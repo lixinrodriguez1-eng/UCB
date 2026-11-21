@@ -9,8 +9,13 @@ const EVENTO = "caserita:celulares-cambio";
 
 type Celulares = Record<string, string>;
 
+const SIN_CELULARES: Celulares = Object.freeze({}) as Celulares;
 let ultimoCrudo: string | null | undefined;
-let ultimos: Celulares = {};
+let ultimos: Celulares = SIN_CELULARES;
+
+export function sinCelulares(): Celulares {
+  return SIN_CELULARES;
+}
 
 /** Mismo objeto mientras no cambie (para useSyncExternalStore). */
 export function obtenerCelulares(): Celulares {
@@ -18,7 +23,7 @@ export function obtenerCelulares(): Celulares {
     const crudo = window.localStorage.getItem(CLAVE);
     if (crudo !== ultimoCrudo) {
       ultimoCrudo = crudo;
-      ultimos = crudo ? (JSON.parse(crudo) as Celulares) : {};
+      ultimos = crudo ? (JSON.parse(crudo) as Celulares) : SIN_CELULARES;
     }
   } catch {
     // sin storage: queda lo que había

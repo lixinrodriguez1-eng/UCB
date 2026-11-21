@@ -93,6 +93,8 @@ const PAGO_EFECTIVO = new Set(["efectivo", "contado", "cash"]);
 const MONEDA = new Set(["bs", "boliviano", "bolivianos", "peso", "pesos"]);
 const ANTES_DE_TOTAL = new Set([
   "a", "por", "en", "son", "total", "cobre", "pague", "cuesta", "vale",
+  // "don Juan me debe 30": el número suelto después de "debe" es el monto.
+  "debe", "deben",
 ]);
 /** Títulos de trato, normalizados → como se escriben ("dona" → "doña"). */
 export const TITULOS: Record<string, string> = {
@@ -290,6 +292,30 @@ const redondear = (x: number) => Math.round(x * 100) / 100;
  *
  * Si falta algo, devuelve lo que entendió y la lista `faltantes`.
  */
+/** Producto que se usa para una deuda dicha sin detalle ("don Juan me debe 30"). */
+export const PRODUCTO_DEUDA = "deuda";
+
+/**
+ * Parte una frase con varios registros: "Vendí 2 kilos de papa a 9 pesos y
+ * don Juan me debe 30" → ["Vendí 2 kilos de papa a 9 pesos", "don Juan me debe 30"].
+ * Solo corta en " y " cuando lo que sigue trae su propio verbo (vendí, compré,
+ * me debe, se llevó…), para no partir "cuarenta y cinco" ni "kilo y medio".
+ */
+export function dividirFrase(texto: string): string[] {
+  const partes = texto.split(/\s+y\s+/i);
+  if (partes.length === 1) return [texto.trim()];
+  const conVerbo = (t: string) => {
+    const n = normalizar(t).split(/[^\p{L}\d]+/u);
+    return n.some((p) => MARCAS_VENTA.has(p) || MARCAS_COMPRA.has(p) || MARCAS_FIADO.has(p));
+  };
+  const frases: string[] = [partes[0]];
+  for (const parte of partes.slice(1)) {
+    if (conVerbo(parte) && conVerbo(frases[frases.length - 1])) frases.push(parte);
+    else frases[frases.length - 1] += ` y ${parte}`;
+  }
+  return frases.map((f) => f.trim()).filter(Boolean);
+}
+
 export function parsearFrase(
   texto: string,
   vocabulario: Vocabulario = vocabularioPorDefecto,
@@ -435,6 +461,20 @@ export function parsearFrase(
 
   if (resultado.producto) {
     resultado.categoria = resolverCategoria(resultado.producto).categoria;
+  }
+
+  // --- Deuda sin detalle: "don Juan me debe 30" ----------------------------
+  // Hay cliente y monto pero ningún producto ni cantidad: se apunta como deuda.
+  if (
+    resultado.tipo === "fiado" &&
+    resultado.total !== undefined &&
+    resultado.producto === undefined &&
+    resultado.cantidad === undefined
+  ) {
+    resultado.producto = PRODUCTO_DEUDA;
+    resultado.cantidad = 1;
+    resultado.unidad = "unidad";
+    resultado.soloDeuda = true;
   }
 
   // --- Faltantes --------------------------------------------------------

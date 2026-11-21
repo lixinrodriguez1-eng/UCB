@@ -34,7 +34,8 @@ function resolver(op: OpcionesCalculo = {}) {
 }
 
 const mismoProducto = (a: string, b: string) => normalizar(a).trim() === normalizar(b).trim();
-const esVenta = (m: Movimiento) => m.tipo === "venta" || m.tipo === "fiado";
+/** Ventas y fiados con producto. Una deuda dicha sin detalle no es venta. */
+export const esVenta = (m: Movimiento) => (m.tipo === "venta" || m.tipo === "fiado") && !m.soloDeuda;
 
 // ---------------------------------------------------------------------------
 // Unidades
