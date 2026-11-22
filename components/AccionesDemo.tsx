@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { generarMovimientosDemo } from "@/lib/demo";
 import { cargarDemoCompleto } from "@/lib/demoCompleto";
@@ -117,6 +118,9 @@ export default function AccionesDemo() {
           {aviso}
         </p>
       )}
+      <Link href="/creditos" className="mt-3 inline-block text-sm text-tinta-suave underline">
+        Créditos de fotos
+      </Link>
     </footer>
   );
 }

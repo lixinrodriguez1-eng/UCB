@@ -1,10 +1,28 @@
-﻿export interface Categoria {
+﻿import creditosFotos from "./creditos-fotos.json";
+
+export interface Categoria {
   id: string;
   nombre: string;
   icono: string;
+  /** Foto de la categoría (Pexels), si se descargó. */
+  imagen?: string;
 }
 
-export const CATEGORIAS: Categoria[] = [
+/** Id para archivos: "plátano beniano" → "platano-beniano". */
+export function idProducto(nombre: string): string {
+  return nombre
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+// Fotos descargadas por scripts/descargar-fotos.mjs (ver data/creditos-fotos.json).
+const FOTOS_PRODUCTO = new Map<string, string>(creditosFotos.productos.map((f: { id: string; archivo: string }) => [f.id, f.archivo]));
+const FOTOS_CATEGORIA = new Map<string, string>(creditosFotos.categorias.map((f: { id: string; archivo: string }) => [f.id, f.archivo]));
+
+const CATEGORIAS_BASE: Categoria[] = [
   { id: "verduras", nombre: "Verduras", icono: "🥬" },
   { id: "frutas", nombre: "Frutas", icono: "🍎" },
   { id: "tuberculos", nombre: "Tubérculos y granos", icono: "🥔" },
@@ -14,6 +32,11 @@ export const CATEGORIAS: Categoria[] = [
   { id: "limpieza", nombre: "Limpieza y otros", icono: "🧴" },
   { id: "otros", nombre: "Otros", icono: "📦" },
 ];
+
+export const CATEGORIAS: Categoria[] = CATEGORIAS_BASE.map((c) => {
+  const imagen = FOTOS_CATEGORIA.get(`categoria-${c.id}`);
+  return imagen ? { ...c, imagen } : c;
+});
 
 export const CATEGORIA_OTROS = "otros";
 
@@ -30,9 +53,14 @@ export interface ProductoCatalogo {
   nombre: string;
   categoria: string;
   sinonimos?: string[];
+  /**
+   * Foto del producto (Pexels, 300×300 webp en /public/productos). Si no hubo
+   * una foto buena, la de su categoría.
+   */
+  imagen?: string;
 }
 
-export const CATALOGO: ProductoCatalogo[] = [
+const CATALOGO_BASE: ProductoCatalogo[] = [
   { nombre: "tomate", categoria: "verduras", sinonimos: ["tomates", "tomatito", "tomatitos"] },
   { nombre: "cebolla", categoria: "verduras", sinonimos: ["cebollas", "cebolla blanca", "cebolla roja"] },
   { nombre: "cebolla en hoja", categoria: "verduras", sinonimos: ["cebolla verde"] },
@@ -224,3 +252,8 @@ export const CATALOGO: ProductoCatalogo[] = [
   { nombre: "vela", categoria: "limpieza", sinonimos: ["velas"] },
   { nombre: "pilas", categoria: "limpieza" },
 ];
+
+export const CATALOGO: ProductoCatalogo[] = CATALOGO_BASE.map((p) => {
+  const imagen = FOTOS_PRODUCTO.get(idProducto(p.nombre)) ?? FOTOS_CATEGORIA.get(`categoria-${p.categoria}`);
+  return imagen ? { ...p, imagen } : p;
+});

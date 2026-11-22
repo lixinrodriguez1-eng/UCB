@@ -12,6 +12,7 @@ import { useAlmacen } from "@/lib/useAlmacen";
 import QrEjemplo from "@/components/QrEjemplo";
 import TarjetaAlerta from "@/components/TarjetaAlerta";
 import { ResumenGrupal } from "@/components/TarjetaPedido";
+import FotoProducto from "@/components/FotoProducto";
 
 const ESTADO = {
   pendiente: { texto: "Pendiente", clase: "bg-amarillo-claro" },
@@ -42,7 +43,8 @@ function FilaPedido({ pedido, onAlerta }: { pedido: Pedido; onAlerta: (a: Alerta
   return (
     <li className="p-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <FotoProducto producto={pedido.items[0]?.producto} tamano={56} />
+        <div className="min-w-0 flex-1">
           <p className="text-xl font-extrabold">
             {productor?.nombre} <span className="rounded-md bg-amarillo-claro px-1.5 py-0.5 text-xs font-bold align-middle">ejemplo</span>
           </p>

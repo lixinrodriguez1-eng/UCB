@@ -1,9 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { deudas, gananciaDelDia, ventasDelDia } from "@/lib/calculos";
 import { formatearBs } from "@/lib/formato";
 import { useAhora, useMovimientos, usePagos } from "@/lib/useMovimientos";
+
+function Icono({ children }: { children: ReactNode }) {
+  return (
+    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/80 text-[#6b4a2e]" aria-hidden="true">
+      {children}
+    </span>
+  );
+}
 
 function Tarjeta({
   etiqueta,
@@ -11,35 +19,38 @@ function Tarjeta({
   detalle,
   icono,
   clase,
+  onClick,
 }: {
   etiqueta: string;
   valor: string;
   detalle?: string;
-  icono: string;
+  icono: ReactNode;
   clase: string;
+  onClick?: () => void;
 }) {
-  return (
-    // Celular: fila compacta (etiqueta a la izquierda, monto a la derecha).
-    // Pantalla más ancha: tarjeta alta con el monto grande abajo.
-    <div
-      className={`grid grid-cols-[1fr_auto] items-center gap-x-3 rounded-3xl border-4 border-tinta p-4 shadow-[0_6px_0_0_var(--tinta)] sm:block sm:p-5 ${clase}`}
-    >
-      <p className="flex items-center gap-2 whitespace-nowrap text-lg font-extrabold sm:text-xl">
-        <span aria-hidden="true" className="text-2xl">
-          {icono}
-        </span>
-        {etiqueta}
-      </p>
-      <p className="row-span-2 text-right text-3xl font-black min-[400px]:text-4xl leading-none tracking-tight sm:mt-2 sm:text-left sm:text-5xl">
-        {valor}
-      </p>
-      {detalle && <p className="text-sm font-semibold text-tinta-suave sm:mt-3 sm:text-base">{detalle}</p>}
-    </div>
+  const cuerpo = (
+    <>
+      <Icono>{icono}</Icono>
+      <span className="min-w-0 flex-1">
+        <span className="block font-extrabold leading-tight">{etiqueta}</span>
+        {detalle && <span className="mt-0.5 block text-sm font-semibold text-[#8a6a4a]">{detalle}</span>}
+      </span>
+      <span className="text-2xl font-black leading-none tracking-tight">{valor}</span>
+    </>
   );
+  const claseTarjeta = `flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left shadow-[0_8px_18px_rgba(90,50,10,0.05)] ${clase}`;
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={`${claseTarjeta} active:scale-[0.99]`}>
+        {cuerpo}
+      </button>
+    );
+  }
+  return <div className={claseTarjeta}>{cuerpo}</div>;
 }
 
-/** Las tres tarjetas grandes de arriba. */
-export default function Resumen() {
+/** Las tres tarjetas del día: vendido, ganancia y fiados. */
+export default function Resumen({ onVendiste, onDeben }: { onVendiste?: () => void; onDeben?: () => void } = {}) {
   const movimientos = useMovimientos();
   const pagos = usePagos();
   const ahora = useAhora();
@@ -62,7 +73,7 @@ export default function Resumen() {
 
   if (!datos) {
     // Mismo alto que las tarjetas para que la página no salte al cargar.
-    return <div className="grid min-h-44 gap-4 sm:grid-cols-3" aria-hidden="true" />;
+    return <div className="grid min-h-52 gap-2.5" aria-hidden="true" />;
   }
 
   const { ganancia } = datos;
@@ -70,9 +81,15 @@ export default function Resumen() {
   const sinCosto = ganancia.productosSinCosto;
 
   return (
-    <section aria-label="Resumen de hoy" className="grid gap-4 sm:grid-cols-3">
+    <section aria-label="Resumen de hoy" className="grid gap-2.5">
       <Tarjeta
-        icono="🧺"
+        icono={
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M5 10h14l-1.4 9H6.4L5 10z" strokeLinejoin="round" />
+            <path d="M8.5 10c0-2.8 1.6-5 3.5-5s3.5 2.2 3.5 5" strokeLinecap="round" />
+            <path d="M9 14h6" strokeLinecap="round" />
+          </svg>
+        }
         etiqueta="Hoy vendiste"
         valor={formatearBs(datos.vendido)}
         detalle={
@@ -80,10 +97,16 @@ export default function Resumen() {
             ? "Todavía nada hoy"
             : `${datos.ventasHoy} ${datos.ventasHoy === 1 ? "venta" : "ventas"}`
         }
-        clase="bg-amarillo-claro"
+        clase="bg-[#fff3c9]"
+        onClick={onVendiste}
       />
       <Tarjeta
-        icono={pierde ? "📉" : "💰"}
+        icono={
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <circle cx="12" cy="12" r="8" />
+            <path d="M12 7.5v9M9.2 9.6c.6-.8 1.6-1.2 2.8-1.2 1.6 0 2.6.8 2.6 1.9 0 2.4-5.4 1.3-5.4 3.6 0 1.1 1 1.9 2.7 1.9 1.2 0 2.2-.5 2.8-1.3" strokeLinecap="round" />
+          </svg>
+        }
         etiqueta={pierde ? "Hoy perdiste" : "Hoy ganaste"}
         valor={formatearBs(Math.abs(ganancia.ganancia))}
         detalle={
@@ -93,10 +116,15 @@ export default function Resumen() {
               ? "Revisa tus precios"
               : undefined
         }
-        clase={pierde ? "bg-rojo-claro" : "bg-verde-claro"}
+        clase={pierde ? "bg-[#fcd9d3]" : "bg-[#e5f6d8]"}
       />
       <Tarjeta
-        icono="📒"
+        icono={
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M7 4.5h11.5V20H7a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2z" strokeLinejoin="round" />
+            <path d="M9 9h6M9 12.5h6M9 16h4" strokeLinecap="round" />
+          </svg>
+        }
         etiqueta="Te deben"
         valor={formatearBs(datos.deuda)}
         detalle={
@@ -104,7 +132,8 @@ export default function Resumen() {
             ? "Nadie tiene apuntado"
             : `${datos.deudores} ${datos.deudores === 1 ? "persona" : "personas"}`
         }
-        clase="bg-naranja-claro"
+        clase="bg-[#fde7d4]"
+        onClick={onDeben}
       />
     </section>
   );

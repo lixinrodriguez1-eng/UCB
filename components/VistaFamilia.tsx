@@ -18,8 +18,10 @@ import {
 } from "@/lib/familia";
 import { describirCantidad, formatearBs, formatearNumero } from "@/lib/formato";
 import { useAlmacen } from "@/lib/useAlmacen";
+import Link from "next/link";
 import { CambiarRol } from "@/components/SelectorRol";
 import QrEjemplo from "@/components/QrEjemplo";
+import FotoProducto from "@/components/FotoProducto";
 
 const Ejemplo = () => <span className="ml-1 rounded-md bg-amarillo-claro px-1.5 py-0.5 text-xs font-bold align-middle">ejemplo</span>;
 
@@ -53,8 +55,14 @@ function Bolsita({ puesto, onReservado }: { puesto: Puesto; onReservado: (r: Res
       <ul className="mt-3 divide-y-2 divide-crema-oscura">
         {items.map((i) => (
           <li key={i.producto} className="flex items-center justify-between gap-3 py-2">
-            <span className="min-w-0 text-lg">
-              <strong>{i.producto}</strong> · {formatearBs(i.precio)} {porUnidad(i.unidad)}
+            <span className="flex min-w-0 items-center gap-3 text-lg">
+              <FotoProducto producto={i.producto} tamano={52} />
+              <span className="min-w-0">
+                <strong>{i.producto}</strong>
+                <span className="block">
+                  {formatearBs(i.precio)} {porUnidad(i.unidad)}
+                </span>
+              </span>
             </span>
             <span className="flex shrink-0 items-center gap-2">
               <button type="button" onClick={() => cambiar(i.producto, i.unidad === "unidad" ? -1 : -0.5)} aria-label={`Quitar ${i.producto}`} className="h-10 w-10 rounded-full border-4 border-tinta bg-white text-xl font-black">
@@ -182,10 +190,13 @@ export default function VistaFamilia() {
             {resultados.length === 0 && <li className="py-2 text-lg text-tinta-suave">Nadie publicó “{busqueda}” todavía.</li>}
             {resultados.map((r, i) => (
               <li key={`${r.puesto.id}-${r.precio.producto}`} className="flex flex-wrap items-center justify-between gap-2 py-3">
-                <span className="text-lg">
+                <span className="flex items-center gap-3 text-lg">
+                  <FotoProducto producto={r.precio.producto} tamano={44} />
+                  <span>
                   {i === 0 && "🥇 "}
                   <strong>{r.puesto.nombre}</strong>
                   {r.puesto.ejemplo && <Ejemplo />} · {r.precio.producto} {formatearBs(r.precio.precio)} {porUnidad(r.precio.unidad)}
+                  </span>
                 </span>
                 <span className="flex items-center gap-3">
                   <MostrarEstrellas e={r.estrellas} />
@@ -219,9 +230,19 @@ export default function VistaFamilia() {
               {p.productos.length === 0 ? (
                 <p className="mt-2 text-base text-tinta-suave">Todavía no publicó precios.</p>
               ) : (
-                <p className="mt-2 text-lg">
-                  {p.productos.map((x) => `${x.producto} ${formatearBs(x.precio)} ${porUnidad(x.unidad)}`).join(" · ")}
-                </p>
+                <ul className="mt-3 grid grid-cols-2 gap-2">
+                  {p.productos.map((x) => (
+                    <li key={x.producto} className="flex items-center gap-2 rounded-2xl bg-crema p-2 text-base">
+                      <FotoProducto producto={x.producto} tamano={44} />
+                      <span className="min-w-0 leading-tight">
+                        <strong>{x.producto}</strong>
+                        <span className="block whitespace-nowrap">
+                          {formatearBs(x.precio)} {porUnidad(x.unidad)}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               )}
               {p.productos.length > 0 && (
                 <button
@@ -297,6 +318,12 @@ export default function VistaFamilia() {
           </section>
         </div>
       </div>
+
+      <p className="mt-10 text-center">
+        <Link href="/creditos" className="text-sm text-tinta-suave underline">
+          Créditos de fotos
+        </Link>
+      </p>
     </main>
   );
 }

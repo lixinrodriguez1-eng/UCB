@@ -31,11 +31,8 @@ interface ReconocedorVoz {
 }
 type ConstructorReconocedor = new () => ReconocedorVoz;
 
-const IDIOMA_PRINCIPAL = "es-BO";
-const IDIOMA_RESPALDO = "es-419";
-
-/** Si es-BO no está disponible, las siguientes veces se usa directo es-419. */
-let idiomaActual = IDIOMA_PRINCIPAL;
+/** es-BO primero (la demo es de Bolivia); si este Chrome no lo tiene, México y España. */
+const IDIOMAS = ["es-BO", "es-MX", "es-ES"];
 
 function obtenerConstructor(): ConstructorReconocedor | null {
   if (typeof window === "undefined") return null;
@@ -75,18 +72,20 @@ export function escuchar(opciones: OpcionesEscucha): ControlEscucha {
 
   let reconocedor: ReconocedorVoz | null = null;
   let cancelado = false;
+  let indiceIdioma = 0;
+  let reintentosRed = 0;
 
-  const iniciar = (idioma: string) => {
+  const iniciar = () => {
     const r = new Constructor();
     reconocedor = r;
-    r.lang = idioma;
+    r.lang = IDIOMAS[indiceIdioma] ?? IDIOMAS[0];
     r.interimResults = true;
     r.continuous = false;
     r.maxAlternatives = 1;
 
     let texto = "";
     let error: string | null = null;
-    let reintentar = false;
+    let seguir = false;
 
     r.onresult = (e) => {
       texto = Array.from(e.results)
@@ -98,18 +97,26 @@ export function escuchar(opciones: OpcionesEscucha): ControlEscucha {
     };
 
     r.onerror = (e) => {
-      if (e.error === "language-not-supported" && idioma !== IDIOMA_RESPALDO) {
-        idiomaActual = IDIOMA_RESPALDO;
-        reintentar = true;
+      if (e.error === "aborted") return;
+      if (e.error === "language-not-supported" && indiceIdioma < IDIOMAS.length - 1) {
+        indiceIdioma += 1;
+        seguir = true;
         return;
       }
-      if (e.error !== "aborted") error = e.error;
+      // El primer intento a veces falla aunque haya internet.
+      if (e.error === "network" && reintentosRed < 1) {
+        reintentosRed += 1;
+        seguir = true;
+        return;
+      }
+      error = e.error;
     };
 
     r.onend = () => {
       if (cancelado) return;
-      if (reintentar) {
-        iniciar(IDIOMA_RESPALDO);
+      if (seguir) {
+        seguir = false;
+        iniciar();
         return;
       }
       if (error && !texto) opciones.onError(error);
@@ -123,7 +130,7 @@ export function escuchar(opciones: OpcionesEscucha): ControlEscucha {
     }
   };
 
-  iniciar(idiomaActual);
+  iniciar();
 
   return {
     detener: () => reconocedor?.stop(),
@@ -145,7 +152,7 @@ export function mensajeErrorVoz(codigo: string): string {
     case "audio-capture":
       return "No encuentro el micrófono. Puedes escribirlo aquí.";
     case "network":
-      return "Se necesita internet para entender la voz. Puedes escribirlo aquí.";
+      return "No pude oírte: Chrome necesita internet para entender la voz. Escríbelo aquí.";
     default:
       return "Algo falló con el micrófono. Intenta de nuevo o escríbelo.";
   }

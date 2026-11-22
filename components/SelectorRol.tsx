@@ -64,14 +64,18 @@ export default function SelectorRol({ caserita, productor, familia }: Record<Rol
 }
 
 /** Botón chico para volver al selector de rol. */
-export function CambiarRol() {
+export function CambiarRol({ discreto = false }: { discreto?: boolean }) {
   return (
     <button
       type="button"
       onClick={() => elegirRol("")}
-      className="whitespace-nowrap rounded-full border-2 border-tinta/40 px-3 py-1.5 text-sm font-bold text-tinta-suave hover:bg-crema-oscura"
+      className={
+        discreto
+          ? "text-xs font-semibold text-[#a08972] underline decoration-dotted underline-offset-2"
+          : "whitespace-nowrap rounded-full border-2 border-tinta/40 px-3 py-1.5 text-sm font-bold text-tinta-suave hover:bg-crema-oscura"
+      }
     >
-      ↩ Cambiar rol
+      {discreto ? "Cambiar rol" : "↩ Cambiar rol"}
     </button>
   );
 }

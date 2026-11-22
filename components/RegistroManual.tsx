@@ -3,6 +3,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { CATEGORIAS, etiquetaCategoria, productosPorCategoria, resolverCategoria, establecerCategoriaProducto } from "@/lib/catalogo";
 import { obtenerMovimientosEnCache, suscribirMovimientos } from "@/lib/storage";
+import FotoProducto from "@/components/FotoProducto";
 
 interface Props {
   onElegir: (producto: string, categoria: string) => void;
@@ -58,17 +59,23 @@ export default function RegistroManual({ onElegir, onCerrar }: Props) {
             <p className="mb-2 text-lg font-bold">Mis productos</p>
             <div className="mb-4 grid grid-cols-2 gap-2">
               {usados.map((p) => (
-                <button key={p} type="button" onClick={() => elegir(p)} className="rounded-2xl border-4 border-tinta/20 bg-white px-3 py-4 text-left text-xl font-bold active:scale-95">
-                  {p}
-                  <div className="text-sm font-semibold text-tinta-suave">{etiquetaCategoria(resolverCategoria(p).categoria)}</div>
+                <button key={p} type="button" onClick={() => elegir(p)} className="flex items-center gap-3 rounded-2xl border-4 border-tinta/20 bg-white px-3 py-3 text-left text-xl font-bold active:scale-95">
+                  <FotoProducto producto={p} tamano={56} />
+                  <span className="min-w-0">
+                    {p}
+                    <span className="block text-sm font-semibold text-tinta-suave">{etiquetaCategoria(resolverCategoria(p).categoria)}</span>
+                  </span>
                 </button>
               ))}
             </div>
             <p className="mb-2 text-lg font-bold">Categorías</p>
             <div className="grid grid-cols-2 gap-2">
               {CATEGORIAS.map((c) => (
-                <button key={c.id} type="button" onClick={() => setCategoria(c.id)} className="rounded-2xl border-4 border-tinta/20 bg-white px-3 py-4 text-left text-xl font-extrabold active:scale-95">
-                  <span className="text-3xl">{c.icono}</span> <span className="block">{c.nombre}</span>
+                <button key={c.id} type="button" onClick={() => setCategoria(c.id)} className="flex items-center gap-3 rounded-2xl border-4 border-tinta/20 bg-white px-3 py-3 text-left text-xl font-extrabold active:scale-95">
+                  <FotoProducto categoria={c.id} tamano={56} />
+                  <span className="min-w-0">
+                    <span aria-hidden="true">{c.icono}</span> {c.nombre}
+                  </span>
                 </button>
               ))}
             </div>
@@ -80,8 +87,9 @@ export default function RegistroManual({ onElegir, onCerrar }: Props) {
             <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar producto" className="mb-3 w-full rounded-2xl border-4 border-tinta bg-white px-4 py-3 text-xl" />
             <div className="grid grid-cols-2 gap-2">
               {productos.map((p) => (
-                <button key={p} type="button" onClick={() => elegir(p, categoria)} className="rounded-2xl border-2 border-tinta/20 bg-white px-3 py-3 text-left text-lg font-bold active:scale-95">
-                  {p}
+                <button key={p} type="button" onClick={() => elegir(p, categoria)} className="flex items-center gap-3 rounded-2xl border-2 border-tinta/20 bg-white px-3 py-2 text-left text-lg font-bold active:scale-95">
+                  <FotoProducto producto={p} tamano={52} />
+                  <span className="min-w-0">{p}</span>
                 </button>
               ))}
             </div>

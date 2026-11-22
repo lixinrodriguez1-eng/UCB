@@ -7,6 +7,7 @@ import { productorPorId } from "@/lib/ejemplos";
 import { describirCantidad, formatearBs, formatearNumero, pluralizar } from "@/lib/formato";
 import { hablar } from "@/lib/habla";
 import { useAhora, useMovimientos } from "@/lib/useMovimientos";
+import FotoProducto from "@/components/FotoProducto";
 
 interface Props {
   texto: string;
@@ -93,7 +94,10 @@ export default function TarjetaPedido({ texto, items, onCerrar }: Props) {
           <div className="mt-4 space-y-5">
             {comparaciones.map(({ item, ofertas }, i) => (
               <fieldset key={`${item.producto}-${i}`}>
-                <legend className="mb-2 text-xl font-extrabold">{describirCantidad(item.cantidad, item.unidad, item.producto)}</legend>
+                <legend className="mb-2 flex items-center gap-3 text-xl font-extrabold">
+                  <FotoProducto producto={item.producto} tamano={56} />
+                  {describirCantidad(item.cantidad, item.unidad, item.producto)}
+                </legend>
                 {ofertas.length === 0 ? (
                   <p className="rounded-xl bg-white p-3 text-base">Ningún productor de ejemplo tiene {item.producto}.</p>
                 ) : (

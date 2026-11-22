@@ -8,6 +8,7 @@ import { describirCantidad, formatearBs, formatearNumero, pluralizar } from "@/l
 import { useAlmacen } from "@/lib/useAlmacen";
 import { useAhora } from "@/lib/useMovimientos";
 import { CambiarRol } from "@/components/SelectorRol";
+import FotoProducto from "@/components/FotoProducto";
 
 const ESTADO = {
   pendiente: { texto: "Pendiente", clase: "bg-amarillo-claro" },
@@ -79,10 +80,13 @@ export default function VistaProductor() {
         </h2>
         <ul className="mt-2 grid gap-2 sm:grid-cols-3">
           {productor.productos.map((o) => (
-            <li key={o.producto} className="rounded-2xl bg-crema p-3 text-lg">
-              <strong>{o.producto}</strong>
-              <span className="block">
-                {formatearBs(o.precio)} por {o.unidad}
+            <li key={o.producto} className="flex items-center gap-3 rounded-2xl bg-crema p-3 text-lg">
+              <FotoProducto producto={o.producto} tamano={64} />
+              <span>
+                <strong>{o.producto}</strong>
+                <span className="block">
+                  {formatearBs(o.precio)} por {o.unidad}
+                </span>
               </span>
             </li>
           ))}
@@ -106,7 +110,8 @@ export default function VistaProductor() {
             <ul className="divide-y-2 divide-crema-oscura">
               {g.pedidos.map((p) => (
                 <li key={p.id} className="flex items-start justify-between gap-3 px-5 py-3">
-                  <div className="min-w-0">
+                  <FotoProducto producto={p.items[0]?.producto} tamano={48} />
+                  <div className="min-w-0 flex-1">
                     <p className="text-lg font-extrabold">
                       {p.caserita}
                       {!p.ejemplo && <span className="ml-2 rounded-md bg-azul-claro px-1.5 py-0.5 text-xs font-bold">desde la app</span>}

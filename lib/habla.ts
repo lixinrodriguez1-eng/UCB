@@ -69,22 +69,89 @@ export function suscribirSilencio(alCambiar: () => void): () => void {
 
 // --- Hablar -----------------------------------------------------------------
 
-export function hablar(texto: string): void {
-  if (!texto || !hablaSoportada() || estaSilenciado()) return;
+/**
+ * Chrome a veces no suena si se llama a cancel() y a speak() en el mismo
+ * instante, o si el motor quedó en pausa. Esta espera lo evita.
+ */
+const ESPERA_TRAS_CALLAR = 80;
+
+function armarFrase(texto: string, conVoz: boolean): SpeechSynthesisUtterance {
   const s = window.speechSynthesis;
-  s.cancel(); // no encimar respuestas
   const frase = new SpeechSynthesisUtterance(texto);
-  const voz = elegirVoz(s.getVoices());
+  const voz = conVoz ? elegirVoz(s.getVoices()) : undefined;
   if (voz) {
     frase.voice = voz;
     frase.lang = voz.lang;
   } else {
-    frase.lang = "es-419";
+    frase.lang = "es";
   }
   frase.rate = 1;
+  return frase;
+}
+
+function pronunciar(texto: string): void {
+  const s = window.speechSynthesis;
+  const frase = armarFrase(texto, true);
+  frase.volume = 1;
+  // Si la voz elegida no existe en este equipo, reintenta con español genérico.
+  frase.onerror = (evento) => {
+    const codigo = evento.error;
+    if (codigo === "canceled" || codigo === "interrupted") return;
+    if (codigo !== "voice-unavailable" && codigo !== "language-unavailable" && codigo !== "synthesis-failed") return;
+    const otra = armarFrase(texto, false);
+    otra.volume = 1;
+    s.resume();
+    s.speak(otra);
+  };
+  if (s.paused) s.resume();
+  s.resume();
   s.speak(frase);
 }
 
+let espera: number | null = null;
+
+function lanzar(texto: string): void {
+  const s = window.speechSynthesis;
+  if (espera !== null) window.clearTimeout(espera);
+  s.cancel();
+  espera = window.setTimeout(() => {
+    espera = null;
+    if (!estaSilenciado()) pronunciar(texto);
+  }, ESPERA_TRAS_CALLAR);
+}
+
+/** Despierta el motor de voz en el clic, sin pronunciar nada (un volumen 0 deja el altavoz mudo). */
+export function prepararAudio(): void {
+  if (!hablaSoportada()) return;
+  const s = window.speechSynthesis;
+  s.getVoices();
+  s.resume();
+}
+
+export function hablar(texto: string): void {
+  if (!texto || !hablaSoportada() || estaSilenciado()) return;
+  const s = window.speechSynthesis;
+  if (s.getVoices().length > 0) {
+    lanzar(texto);
+    return;
+  }
+  let hecho = false;
+  const unaVez = () => {
+    if (hecho) return;
+    hecho = true;
+    s.removeEventListener("voiceschanged", unaVez);
+    lanzar(texto);
+  };
+  s.addEventListener("voiceschanged", unaVez);
+  s.getVoices();
+  window.setTimeout(unaVez, 400);
+}
+
 export function callar(): void {
-  if (hablaSoportada()) window.speechSynthesis.cancel();
+  if (!hablaSoportada()) return;
+  if (espera !== null) {
+    window.clearTimeout(espera);
+    espera = null;
+  }
+  window.speechSynthesis.cancel();
 }

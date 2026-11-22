@@ -178,7 +178,7 @@ export const PRECIOS_SUPERMERCADO_ESTIMADOS: Record<string, { unidad: string; pr
 
 /** Precios que publica Doña Rosa en el "Modo demo completo" (como en el resumen del proyecto). */
 export const PUBLICADOS_DEMO = [
-  { producto: "tomate", unidad: "kilo", precio: 7 },
+  { producto: "tomate", unidad: "kilo", precio: 8 },
   { producto: "papa", unidad: "kilo", precio: 4.5 },
   { producto: "lechuga", unidad: "unidad", precio: 5 },
   { producto: "zanahoria", unidad: "kilo", precio: 6 },

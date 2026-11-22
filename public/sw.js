@@ -6,9 +6,9 @@
  *
  * Subir VERSION cuando cambie este archivo o para limpiar el caché viejo.
  */
-const VERSION = "caserita-v2";
+const VERSION = "caserita-v4";
 /** Páginas de la app que se guardan para abrir sin internet. */
-const PAGINAS = ["/", "/reporte"];
+const PAGINAS = ["/", "/reporte", "/creditos"];
 const BASICOS = [
   "/manifest.webmanifest",
   "/icono-192.png",
@@ -16,6 +16,12 @@ const BASICOS = [
   "/icono-maskable-512.png",
   "/icon.png",
   "/apple-icon.png",
+  "/perfil/banner-mercado.jpg",
+  "/perfil/dona-rosa.jpg",
+  "/perfil/canasta-tomate.jpg",
+  "/perfil/canasta-zanahoria.jpg",
+  "/perfil/canasta-lechuga.jpg",
+  "/perfil/canasta-papa.jpg",
 ];
 
 async function guardar(urls) {
@@ -40,7 +46,12 @@ self.addEventListener("install", (event) => {
         // Los scripts y estilos que la página pide, sacados del HTML.
         for (const url of html.match(/\/_next\/static\/[\w\-.~%/]+/g) || []) archivos.add(url);
       }
-      await guardar([...BASICOS, ...archivos]);
+      // Fotos de productos (Pexels, dentro del proyecto): la lista la escribe
+      // scripts/descargar-fotos.mjs en /productos/indice.json.
+      const fotos = await fetch("/productos/indice.json", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : []))
+        .catch(() => []);
+      await guardar([...BASICOS, ...archivos, ...(Array.isArray(fotos) ? fotos : [])]);
       await self.skipWaiting();
     })(),
   );
@@ -89,7 +100,7 @@ self.addEventListener("fetch", (event) => {
   const esEstatico =
     url.pathname.startsWith("/_next/static/") ||
     BASICOS.includes(url.pathname) ||
-    /\.(png|svg|ico|woff2?)$/.test(url.pathname);
+    /\.(png|svg|ico|webp|woff2?)$/.test(url.pathname);
 
   event.respondWith(
     (async () => {

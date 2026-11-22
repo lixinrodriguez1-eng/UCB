@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState } from "react";
+import FotoProducto from "@/components/FotoProducto";
 import type { TipoMovimiento } from "@/types/movimiento";
 import type { CampoParseado, NombreCampo, ResultadoParseo } from "@/lib/parser";
 import { CATEGORIAS, etiquetaCategoria, establecerCategoriaProducto } from "@/lib/catalogo";
@@ -88,9 +89,12 @@ export default function TarjetaConfirmacion({ texto, resultado, onConfirmar, onC
         <h2 id="titulo-confirmacion" className="text-3xl font-black">
           ¿Registro?
         </h2>
-        <p className="mt-2 text-2xl font-semibold leading-snug" aria-live="polite">
-          {resumirMovimiento(datos) || "No entendí bien, ayúdame con los datos"}
-        </p>
+        <div className="mt-2 flex items-center gap-3">
+          {datos.producto && datos.producto !== "deuda" && <FotoProducto producto={datos.producto} tamano={72} />}
+          <p className="text-2xl font-semibold leading-snug" aria-live="polite">
+            {resumirMovimiento(datos) || "No entendí bien, ayúdame con los datos"}
+          </p>
+        </div>
 
         {datos.producto && (
           <div className="mt-3">

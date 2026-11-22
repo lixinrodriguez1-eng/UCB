@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Movimiento, Pago } from "@/types/movimiento";
 import { describirCantidad, formatearBs } from "@/lib/formato";
 import { useAhora, useMovimientos, usePagos } from "@/lib/useMovimientos";
+import FotoProducto from "@/components/FotoProducto";
 
 const ESTILO_TIPO: Record<Movimiento["tipo"], { icono: string; etiqueta: string }> = {
   venta: { icono: "🟢", etiqueta: "Venta" },
@@ -34,8 +35,16 @@ function FilaMovimiento({ m }: { m: Movimiento }) {
   const estilo = ESTILO_TIPO[m.tipo];
   return (
     <li className="flex items-center gap-3 px-4 py-3">
-      <span className="text-3xl leading-none" aria-hidden="true">
-        {estilo.icono}
+      {/* Foto del producto con el color del tipo (🟢 venta, 🔵 compra, 🟡 apuntado) en la esquina */}
+      <span className="relative shrink-0" aria-hidden="true">
+        {m.producto === "deuda" ? (
+          <span className="flex h-12 w-12 items-center justify-center text-3xl">{estilo.icono}</span>
+        ) : (
+          <>
+            <FotoProducto producto={m.producto} tamano={48} />
+            <span className="absolute -bottom-1.5 -right-1.5 text-base leading-none">{estilo.icono}</span>
+          </>
+        )}
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-xl font-bold leading-snug">

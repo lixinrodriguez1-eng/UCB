@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+import BotonSilencio from "@/components/BotonSilencio";
 import { dividirFrase, parsearFrase, type CampoParseado, type ResultadoParseo } from "@/lib/parser";
 import TarjetaPedido from "@/components/TarjetaPedido";
 import { compararOfertas, detectarPedido, type ItemPedidoDicho } from "@/lib/pedidos";
@@ -24,7 +26,7 @@ import type { FormaPago } from "@/types/movimiento";
 import { revisarMargen, type AlertaMargen } from "@/lib/calculos";
 import { detectarPregunta } from "@/lib/preguntas";
 import { fraseAlerta, fraseSaldo, responderPregunta, type Respuesta } from "@/lib/respuestas";
-import { callar, hablar } from "@/lib/habla";
+import { callar, hablar, prepararAudio } from "@/lib/habla";
 
 type Fase =
   | { tipo: "inactivo" }
@@ -41,7 +43,7 @@ const SOPORTE_EN_SERVIDOR = null;
 /** En el servidor todavía no se sabe (null). */
 const soporteEnServidor = () => SOPORTE_EN_SERVIDOR;
 
-export default function BotonMicrofono() {
+export default function BotonMicrofono({ variante = "flotante" }: { variante?: "flotante" | "pastilla" } = {}) {
   const soportada = useSyncExternalStore(sinSuscripcion, vozSoportada, soporteEnServidor);
 
   const [fase, setFase] = useState<Fase>({ tipo: "inactivo" });
@@ -50,12 +52,18 @@ export default function BotonMicrofono() {
   const [forzarTexto, setForzarTexto] = useState(false);
   const [escrito, setEscrito] = useState("");
   const [manual, setManual] = useState(false);
+  const [abierto, setAbierto] = useState(false);
+  const [ranura, setRanura] = useState<HTMLElement | null>(null);
   const escucha = useRef<ControlEscucha | null>(null);
   // "Vendí 2 kilos de papa a 9 pesos y don Juan me debe 30": lo que falta procesar.
   const pendientes = useRef<string[]>([]);
 
   // Si se desmonta mientras escucha, cortar el micrófono.
   useEffect(() => () => escucha.current?.cancelar(), []);
+  useEffect(() => {
+    if (variante !== "pastilla") return;
+    setRanura(document.getElementById("caserita-voz"));
+  }, [variante]);
 
   const modoTexto = soportada === false || forzarTexto;
 
@@ -112,7 +120,7 @@ export default function BotonMicrofono() {
   };
 
   const empezar = () => {
-    callar(); // que el micrófono no se escuche a la app hablando
+    prepararAudio();
     setMensaje(null);
     setTextoParcial("");
     setFase({ tipo: "escuchando" });
@@ -130,7 +138,9 @@ export default function BotonMicrofono() {
       onError: (codigo) => {
         escucha.current = null;
         setFase({ tipo: "inactivo" });
-        setMensaje(mensajeErrorVoz(codigo));
+        const aviso = mensajeErrorVoz(codigo);
+        setMensaje(aviso);
+        hablar(aviso);
         if (errorPideTexto(codigo)) setForzarTexto(true);
       },
     });
@@ -139,6 +149,20 @@ export default function BotonMicrofono() {
   const alTocar = () => {
     if (fase.tipo === "escuchando") escucha.current?.detener();
     else empezar();
+  };
+
+  /** La pastilla "Con voz" del perfil: abre el micrófono, o el texto si no hay voz. */
+  const alPastilla = () => {
+    if (fase.tipo === "escuchando") {
+      escucha.current?.detener();
+      return;
+    }
+    setAbierto(true);
+    if (soportada === false) {
+      setForzarTexto(true);
+      return;
+    }
+    if (!forzarTexto) empezar();
   };
 
   const confirmar = (datos: CampoParseado) => {
@@ -177,15 +201,17 @@ export default function BotonMicrofono() {
   };
 
   const escuchando = fase.tipo === "escuchando";
+  const compacto = variante === "pastilla";
+  const ocupada =
+    fase.tipo === "confirmando" ||
+    fase.tipo === "alerta" ||
+    fase.tipo === "respuesta" ||
+    fase.tipo === "pago" ||
+    fase.tipo === "pedido";
+  const panelVisible = compacto && (abierto || fase.tipo !== "inactivo" || mensaje !== null);
 
-  return (
-    <>
-      {/*
-        Celular: botón gigante centrado abajo, sobre un degradado.
-        Pantalla grande (proyector): franja baja horizontal para no tapar el contenido.
-      */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center lg:border-t-4 lg:border-tinta lg:bg-crema">
-        <div className="pointer-events-auto flex w-full max-w-xl flex-col items-center gap-2 bg-gradient-to-t from-crema via-crema/95 to-crema/0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-6 lg:max-w-6xl lg:flex-row lg:gap-8 lg:bg-none lg:px-6 lg:py-4">
+  const controles = (
+        <div className={`pointer-events-auto flex w-full flex-col items-center gap-2 ${compacto ? "" : "max-w-xl bg-gradient-to-t from-crema via-crema/95 to-crema/0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-6 lg:max-w-6xl lg:flex-row lg:gap-8 lg:bg-none lg:px-6 lg:py-4"}`}>
           {/* Lo que va entendiendo o el último aviso */}
           <div aria-live="polite" className="min-h-8 w-full text-center lg:flex-1 lg:text-left">
             {escuchando ? (
@@ -249,21 +275,21 @@ export default function BotonMicrofono() {
               <div className="relative flex items-center justify-center">
                 {escuchando && (
                   <>
-                    <span className="absolute h-32 w-32 animate-ping rounded-full bg-rojo/40 lg:h-28 lg:w-28" />
-                    <span className="absolute h-40 w-40 animate-pulse rounded-full bg-rojo/20 lg:h-36 lg:w-36" />
+                    <span className={`absolute animate-ping rounded-full bg-rojo/40 ${compacto ? "h-16 w-16" : "h-32 w-32 lg:h-28 lg:w-28"}`} />
+                    <span className={`absolute animate-pulse rounded-full bg-rojo/20 ${compacto ? "h-20 w-20" : "h-40 w-40 lg:h-36 lg:w-36"}`} />
                   </>
                 )}
                 <button
                   type="button"
                   onClick={alTocar}
-                  disabled={soportada === null || fase.tipo === "confirmando" || fase.tipo === "alerta" || fase.tipo === "respuesta" || fase.tipo === "pago" || fase.tipo === "pedido"}
+                  disabled={soportada === null || ocupada}
                   aria-pressed={escuchando}
                   aria-label={escuchando ? "Dejar de escuchar" : "Hablar para registrar"}
-                  className={`relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-tinta text-white shadow-[0_6px_0_0_var(--tinta)] transition active:translate-y-1 active:shadow-none disabled:opacity-60 lg:h-28 lg:w-28 ${
-                    escuchando ? "scale-105 bg-rojo" : "bg-verde"
-                  }`}
+                  className={`relative flex items-center justify-center rounded-full border-4 border-tinta text-white shadow-[0_6px_0_0_var(--tinta)] transition active:translate-y-1 active:shadow-none disabled:opacity-60 ${
+                    compacto ? "h-16 w-16" : "h-32 w-32 lg:h-28 lg:w-28"
+                  } ${escuchando ? "scale-105 bg-rojo" : "bg-verde"}`}
                 >
-                  <svg viewBox="0 0 24 24" className="h-16 w-16" fill="currentColor" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" className={compacto ? "h-8 w-8" : "h-16 w-16"} fill="currentColor" aria-hidden="true">
                     {escuchando ? (
                       <rect x="6" y="6" width="12" height="12" rx="2" />
                     ) : (
@@ -288,8 +314,10 @@ export default function BotonMicrofono() {
             </>
           )}
         </div>
-      </div>
+  );
 
+  const dialogos = (
+    <>
       {fase.tipo === "confirmando" && (
         <TarjetaConfirmacion
           // key: cada frase nueva arranca la tarjeta desde cero
@@ -337,6 +365,65 @@ export default function BotonMicrofono() {
           onCerrar={() => setManual(false)}
         />
       )}
+    </>
+  );
+
+  if (compacto) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={alPastilla}
+          disabled={soportada === null || ocupada}
+          aria-pressed={escuchando}
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border bg-white px-3 py-1.5 text-sm font-bold shadow-sm active:scale-95 disabled:opacity-60 ${
+            escuchando ? "border-rojo text-rojo" : "border-[#eadfce] text-[#3d2b1f]"
+          }`}
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+            <path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z" />
+            <path fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="M16 9.5a3.5 3.5 0 0 1 0 5" />
+          </svg>
+          {escuchando ? "Escuchando" : "Con voz"}
+        </button>
+        {panelVisible &&
+          ranura &&
+          createPortal(
+            <div className="max-h-[46dvh] overflow-y-auto border-t border-[#eadfce] bg-[#fffaf3] px-3 py-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <BotonSilencio />
+                {fase.tipo === "inactivo" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAbierto(false);
+                      setMensaje(null);
+                    }}
+                    className="text-sm font-bold text-tinta-suave underline"
+                  >
+                    Cerrar
+                  </button>
+                )}
+              </div>
+              {controles}
+            </div>,
+            ranura,
+          )}
+        {dialogos}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {/*
+        Celular: botón gigante centrado abajo, sobre un degradado.
+        Pantalla grande (proyector): franja baja horizontal para no tapar el contenido.
+      */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center lg:border-t-4 lg:border-tinta lg:bg-crema">
+        {controles}
+      </div>
+      {dialogos}
     </>
   );
 }

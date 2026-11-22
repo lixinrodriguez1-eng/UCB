@@ -226,3 +226,35 @@ export function productosMasUsados(movimientos: { producto: string }[], limite =
   }
   return [...conteo.values()].sort((a, b) => b.n - a.n).slice(0, limite).map((x) => x.nombre);
 }
+
+// ---------------------------------------------------------------------------
+// Fotos de productos (Pexels, dentro del proyecto: funcionan sin internet)
+// ---------------------------------------------------------------------------
+
+export interface FotoProducto {
+  src: string;
+  /** true si es la foto de la categoría (el producto no tiene una propia). */
+  deCategoria: boolean;
+}
+
+/** Foto de la categoría, si se descargó. */
+export function imagenCategoria(categoria: string): string | undefined {
+  return categoriaPorId(categoria).imagen;
+}
+
+/**
+ * Foto para mostrar un producto: la suya si está en el catálogo; si no (por
+ * ejemplo, un producto nuevo dicho por voz), la de su categoría.
+ */
+const POR_NOMBRE = new Map(CATALOGO.map((p) => [p.nombre, p]));
+
+export function imagenProducto(nombre: string): FotoProducto | null {
+  const entrada = CLAVES_CATALOGO.get(claveProducto(nombre));
+  const delCatalogo = entrada ? POR_NOMBRE.get(entrada.nombre) : undefined;
+  if (delCatalogo?.imagen) {
+    return { src: delCatalogo.imagen, deCategoria: delCatalogo.imagen.includes("/categoria-") };
+  }
+  const categoria = delCatalogo?.categoria ?? resolverCategoria(nombre).categoria;
+  const src = imagenCategoria(categoria);
+  return src ? { src, deCategoria: true } : null;
+}
